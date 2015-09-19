@@ -14,13 +14,9 @@ namespace BondsMapWPF
         public ChartWindow(DataTable[] selectedRecordsTables)
         {
             InitializeComponent();
-            var selectedRecordsTable = selectedRecordsTables[0];
 
             var notNullRecords = selectedRecordsTables.AsEnumerable().SelectMany(s=>s.AsEnumerable())
                 .Where(w => !w.IsNull("Duration") && !w.IsNull("YieldClose")).ToArray();
-
-            if (!notNullRecords.Any())
-                return;
 
             var minDuration = notNullRecords.Min(s => Convert.ToInt32(s["Duration"]));
             var maxDuration = notNullRecords.Max(s => Convert.ToInt32(s["Duration"]));
@@ -70,6 +66,8 @@ namespace BondsMapWPF
             {
                 var notNullTable = recordsTable.AsEnumerable().
                     Where(w => !w.IsNull("Duration") && !w.IsNull("YieldClose")).ToArray();
+
+                if (!notNullTable.Any()) continue;
 
                 BondsMapChart.Series.Add(new Series(recordsTable.TableName)
                 {

@@ -164,7 +164,9 @@ namespace BondsMapWPF
 
         private void BuildBondsMapButton_Click(object sender, RoutedEventArgs e)
         {
-            ChartWindow chartWindow = new ChartWindow(GroupsComboBox.Items.Cast<DataTable>().ToArray());
+            var selectedRecordsTables = GroupsComboBox.Items.Cast<DataTable>().ToArray();
+            if (selectedRecordsTables.SelectMany(s => s.AsEnumerable()).All(w => w.IsNull("Duration") || w.IsNull("YieldClose"))) return;
+            ChartWindow chartWindow = new ChartWindow(selectedRecordsTables);
             chartWindow.Show();
         }
 
