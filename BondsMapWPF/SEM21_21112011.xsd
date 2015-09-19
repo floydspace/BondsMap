@@ -1,0 +1,489 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!-- edited with XMLSpy v2012 sp1 (http://www.altova.com) by Dmitry Gorokhov (MICEX) -->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="unqualified" attributeFormDefault="unqualified">
+	<xs:simpleType name="DOCTYPEID_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Идентификатор типа документа в системе ЭДО"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="12"/>
+			<xs:pattern value="[A-Z,0-9,_,//,А-Я]{1,12}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DOCNO_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Уникальный учетный номер документа в системе ЭДО"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="12"/>
+			<xs:pattern value="[A-Z,0-9,//]{1,12}"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SENDERID_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Идентификатор фирмы отправителя/получателя ЭДО"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="12"/>
+			<xs:minLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SENDERNAME_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Наименование фирмы отправителя/получателя в системе ЭДО"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="REMARKS_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Примечание к документу"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="120"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="RECNO_Type">
+		<xs:annotation>
+			<xs:documentation>Тип "Номер записи"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:integer">
+			<xs:totalDigits value="11"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FIRMID_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Идентификатор фирмы"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="12"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FIRMNAME_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Краткое наименование фирмы"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FIRMNAME_LONG_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Hаименование фирмы"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="0"/>
+			<xs:maxLength value="120"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FIRM_INN_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "ИНН фирмы"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="12"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BOARDID_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Код, присвоенный режиму торгов"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="4"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BOARD_NAME_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Наименование режима торгов"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SECURITYID_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Идентификатор ценной бумаги"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="12"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SEC_SHORT_NAME_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Краткое наименование ценной бумаги"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="10"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SEC_NAME_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Полное наименование ценной бумаги"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="30"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SEC_TYPE_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Тип ценной бумаги"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TRDACCID_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Идентификатор торгового счета"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="12"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="CURRENCYID_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Идентификатор вылюты"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="4"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="SETTLECODE_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Код расчётов"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="12"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BUYSELL_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Вид сделки 'B'-покупка, 'S'-продажа"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="1"/>
+			<xs:enumeration value="B"/>
+			<xs:enumeration value="S"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="YES_NO_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: " "Y"-YES, "N"-NO"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="1"/>
+			<xs:enumeration value="Y"/>
+			<xs:enumeration value="N"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TRADE_PERIOD_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Период торгов"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:minLength value="1"/>
+			<xs:maxLength value="1"/>
+			<xs:enumeration value="C"/>
+			<xs:enumeration value="N"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DECIMALS_Type">
+		<xs:annotation>
+			<xs:documentation>Тип "Число значимых знаков после запятой"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:integer">
+			<xs:totalDigits value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="QUANTITY_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Количество"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="20"/>
+			<xs:fractionDigits value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FLOAT_20.2_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Вещественное число с длиной дробной части = 2"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="20"/>
+			<xs:fractionDigits value="2"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="FLOAT_20.4_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Вещественное число с длиной дробной части = 4"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="20"/>
+			<xs:fractionDigits value="4"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="PRICE_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Цена, ставка"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="20"/>
+			<xs:fractionDigits value="6"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="WEEKDAY_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Наименование дня недели"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="20"/>
+			<xs:enumeration value="Понедельник"/>
+			<xs:enumeration value="Вторник"/>
+			<xs:enumeration value="Среда"/>
+			<xs:enumeration value="Четверг"/>
+			<xs:enumeration value="Пятница"/>
+			<xs:enumeration value="Суббота"/>
+			<xs:enumeration value="Воскресенье"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TRADENO_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Номер сделки/заявки/отчета в торговой системе"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:decimal">
+			<xs:totalDigits value="20"/>
+			<xs:fractionDigits value="0"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="ORDER_TYPE_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Тип заявки"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="3"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="TRADE_TYPE_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Тип сделки"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="1"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="CLIENT_CODE_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Код клиента"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="12"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="DETAILS_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Идентификационные данные клиента (ИНН или номер паспорта)"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="20"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="MATCHREF_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Ссылка"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="10"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="BROKERREF_Type">
+		<xs:annotation>
+			<xs:documentation>Тип: "Дополнительная справочная информация"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="20"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="EXTREF_Type">
+		<xs:annotation>
+			<xs:documentation>Тип "Поле-примечание, используется для обратной связи с внешними системами"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:maxLength value="12"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="REPOPERIOD_Type">
+		<xs:annotation>
+			<xs:documentation>Тип "Срок сделки РЕПО"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:integer">
+			<xs:totalDigits value="11"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:simpleType name="STATUS_Type">
+		<xs:annotation>
+			<xs:documentation>Тип "Состояние заявки"</xs:documentation>
+		</xs:annotation>
+		<xs:restriction base="xs:string">
+			<xs:length value="1"/>
+			<xs:enumeration value="M"/>
+			<xs:enumeration value="C"/>
+			<xs:enumeration value="W"/>
+			<xs:enumeration value="O"/>
+		</xs:restriction>
+	</xs:simpleType>
+	<xs:complexType name="DOC_REQUISITES_Type">
+		<xs:annotation>
+			<xs:documentation>Реквизиты документа в системе электронного документооборота</xs:documentation>
+		</xs:annotation>
+		<xs:attribute name="DOC_DATE" type="xs:date" use="optional">
+			<!--Дата формирования документа-->
+		</xs:attribute>
+		<xs:attribute name="DOC_TIME" type="xs:time" use="optional">
+			<!--Время формирования документа-->
+		</xs:attribute>
+		<xs:attribute name="DOC_NO" type="DOCNO_Type" use="optional">
+			<!--Уникальный учетный номер документа-->
+		</xs:attribute>
+		<xs:attribute name="DOC_TYPE_ID" type="DOCTYPEID_Type" use="optional">
+			<!--Идентификатор типа документа-->
+		</xs:attribute>
+		<xs:attribute name="SENDER_ID" type="SENDERID_Type" use="optional">
+			<!--Идентификатор фирмы-отправителя документа-->
+		</xs:attribute>
+		<xs:attribute name="SENDER_NAME" type="SENDERNAME_Type" use="optional">
+			<!--Наименование (краткое) организатора системы электронного документооборота-->
+		</xs:attribute>
+		<xs:attribute name="RECEIVER_ID" type="SENDERID_Type" use="optional">
+			<!--Идентификатор фирмы-получателя документа-->
+		</xs:attribute>
+		<xs:attribute name="REMARKS" type="REMARKS_Type" use="optional">
+			<!--Примечание к документу-->
+		</xs:attribute>
+	</xs:complexType>
+	<xs:element name="MICEX_DOC">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="DOC_REQUISITES"/>
+				<xs:element ref="SEM21"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="DOC_REQUISITES" type="DOC_REQUISITES_Type"/>
+	<xs:element name="SEM21">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="BOARD" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="TradeDate" type="xs:date" use="required"/>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="BOARD">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="RECORDS" maxOccurs="unbounded"/>
+			</xs:sequence>
+			<xs:attribute name="BoardId" type="BOARDID_Type" use="required"/>
+			<xs:attribute name="BoardName" type="BOARD_NAME_Type" use="required"/>
+			<xs:attribute name="EngBoardName" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="35"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="BoardType" use="optional">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="8"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="RECORDS">
+		<xs:complexType>
+			<xs:attribute name="SecurityId" type="SECURITYID_Type" use="required"/>
+			<xs:attribute name="SecShortName" type="SEC_SHORT_NAME_Type" use="required"/>
+			<xs:attribute name="SecurityType" type="SEC_TYPE_Type" use="required"/>
+			<xs:attribute name="EngName" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="30"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="EngType" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="2"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="RegNumber" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="20"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="Decimals" type="DECIMALS_Type" use="required"/>
+			<xs:attribute name="FaceValue" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="Volume" type="QUANTITY_Type" use="required"/>
+			<xs:attribute name="Value" type="FLOAT_20.2_Type" use="required"/>
+			<xs:attribute name="CurrencyId" type="CURRENCYID_Type" use="required"/>
+			<xs:attribute name="OpenPeriod" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="Open" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="Low" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="High" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="Close" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="LowOffer" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="HighBid" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="WAPrice" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="CloseAuction" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="ClosePeriod" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="TrendClose" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="TrendWAP" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="Bid" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="Offer" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="Prev" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="YieldAtWAP" type="FLOAT_20.4_Type" use="optional"/>
+			<xs:attribute name="YieldClose" type="FLOAT_20.4_Type" use="optional"/>
+			<xs:attribute name="AccInt" type="FLOAT_20.4_Type" use="optional"/>
+			<xs:attribute name="MarketPrice" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="NumTrades" type="xs:integer" use="required"/>
+			<xs:attribute name="IssueSize" type="QUANTITY_Type" use="required"/>
+			<xs:attribute name="TrendClsPr" type="FLOAT_20.2_Type" use="optional"/>
+			<xs:attribute name="TrendWapPr" type="FLOAT_20.2_Type" use="optional"/>
+			<xs:attribute name="MatDate" type="xs:date" use="optional"/>
+			<xs:attribute name="MarketPrice2" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="MarketPrice3" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="AdmittedQuote" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="ListName" use="optional">
+				<xs:simpleType>
+					<xs:restriction base="xs:string">
+						<xs:maxLength value="2"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+			<xs:attribute name="PrevLegalClosePrice" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="LegalOpenPrice" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="LegalClosePrice" type="PRICE_Type" use="optional"/>
+			<xs:attribute name="OpenVal" type="FLOAT_20.2_Type" use="optional"/>
+			<xs:attribute name="CloseVal" type="FLOAT_20.2_Type" use="optional"/>
+			<xs:attribute name="Duration" type="xs:integer" use="optional"/>
+			<xs:attribute name="MPValTrd" type="FLOAT_20.2_Type" use="required"/>
+			<xs:attribute name="MP2ValTrd" type="FLOAT_20.2_Type" use="required"/>
+			<xs:attribute name="MP3ValTrd" type="FLOAT_20.2_Type" use="required"/>
+			<xs:attribute name="AdmittedValue" type="FLOAT_20.2_Type" use="required"/>
+		</xs:complexType>
+	</xs:element>
+</xs:schema>
