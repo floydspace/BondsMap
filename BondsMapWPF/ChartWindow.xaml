@@ -2,9 +2,61 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:charting="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         Title="Карта облигаций" Height="540" Width="960" WindowStyle="ToolWindow">
     <Grid>
-        <WindowsFormsHost>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Expander ExpandDirection="Right">
+            <Expander.Header>
+                <TextBlock Text="НАСТРОЙКИ">
+                    <TextBlock.LayoutTransform>
+                        <RotateTransform Angle="-90"/>
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
+            </Expander.Header>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Label Grid.Row="0" Content="ОСЬ X" FontWeight="Bold" HorizontalContentAlignment="Center"/>
+                <DockPanel Grid.Row="1">
+                    <Label Content="Минимум" HorizontalAlignment="Left" />
+                    <xctk:IntegerUpDown Value="{Binding ElementName=BondsMapChart, Path=ChartAreas[BondsMap].AxisX.Minimum}" Increment="30" Minimum="0" Maximum="{Binding ElementName=BondsMapChart, Path=ChartAreas[BondsMap].AxisX.Maximum}" HorizontalAlignment="Right" />
+                </DockPanel>
+                <DockPanel Grid.Row="2">
+                    <Label Content="Максимум" />
+                    <xctk:IntegerUpDown Value="{Binding ElementName=BondsMapChart, Path=ChartAreas[BondsMap].AxisX.Maximum}" Increment="30" Minimum="{Binding ElementName=BondsMapChart, Path=ChartAreas[BondsMap].AxisX.Minimum}" HorizontalAlignment="Right" />
+                </DockPanel>
+                <DockPanel Grid.Row="3">
+                    <Label Content="Интервал" HorizontalAlignment="Left" />
+                    <xctk:IntegerUpDown Value="{Binding ElementName=BondsMapChart, Path=ChartAreas[BondsMap].AxisX.Interval}" Increment="30" Minimum="0" HorizontalAlignment="Right" />
+                </DockPanel>
+                <Label Grid.Row="4" Content="ОСЬ Y" FontWeight="Bold" HorizontalContentAlignment="Center"/>
+                <DockPanel Grid.Row="5">
+                    <Label Content="Минимум" HorizontalAlignment="Left" />
+                    <xctk:DoubleUpDown Value="{Binding ElementName=BondsMapChart, Path=ChartAreas[BondsMap].AxisY.Minimum}" Increment=".5" HorizontalAlignment="Right" />
+                </DockPanel>
+                <DockPanel Grid.Row="6">
+                    <Label Content="Максимум" HorizontalAlignment="Left" />
+                    <xctk:DoubleUpDown Value="{Binding ElementName=BondsMapChart, Path=ChartAreas[BondsMap].AxisY.Maximum}" Increment=".5" Minimum="0" HorizontalAlignment="Right" />
+                </DockPanel>
+                <DockPanel Grid.Row="7">
+                    <Label Content="Интервал" HorizontalAlignment="Left" />
+                    <xctk:DoubleUpDown Value="{Binding ElementName=BondsMapChart, Path=ChartAreas[BondsMap].AxisY.Interval}" Increment=".5" Minimum="0" HorizontalAlignment="Right" />
+                </DockPanel>
+            </Grid>
+        </Expander>
+        <WindowsFormsHost Grid.Column="1">
             <charting:Chart x:Name="BondsMapChart" />
         </WindowsFormsHost>
     </Grid>
