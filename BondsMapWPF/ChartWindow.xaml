@@ -27,6 +27,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
                 <Label Grid.Row="0" Content="ОСЬ ДЮРАЦИИ" FontWeight="Bold" HorizontalContentAlignment="Center"/>
                 <DockPanel Grid.Row="1">
@@ -54,6 +56,8 @@
                     <Label Content="Интервал" HorizontalAlignment="Left" />
                     <xctk:DoubleUpDown Value="{Binding ElementName=BondsMapChart, Path=ChartAreas[BondsMap].AxisY.Interval}" Increment=".5" Minimum="0" HorizontalAlignment="Right" />
                 </DockPanel>
+                <Label Grid.Row="8" Content="ПАЛИТРА" FontWeight="Bold" HorizontalContentAlignment="Center"/>
+                <ComboBox Name="PaletteComboBox" SelectedItem="{Binding  ElementName=BondsMapChart, Path=Palette}" Grid.Row="9" SelectionChanged="PaletteComboBox_SelectionChanged" />
             </Grid>
         </Expander>
         <WindowsFormsHost Grid.Column="1">

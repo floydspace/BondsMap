@@ -61,6 +61,7 @@ namespace BondsMapWPF
             });
 
             BondsMapChart.Palette = ChartColorPalette.Bright;
+            PaletteComboBox.ItemsSource = Enum.GetValues(typeof(ChartColorPalette)).Cast<ChartColorPalette>();
 
             foreach (var recordsTable in selectedRecordsTables)
             {
@@ -76,7 +77,6 @@ namespace BondsMapWPF
                     MarkerStyle = MarkerStyle.Circle,
                     MarkerSize = 8,
                     MarkerBorderColor = Color.Black,
-                    //MarkerColor = Color.Black
                 });
                 BondsMapChart.Series[recordsTable.TableName].Points.DataBind(notNullTable, "Duration", "YieldClose",
                     "ToolTip=ChartTip,Label=SecShortName");
@@ -98,6 +98,13 @@ namespace BondsMapWPF
                 BondsMapChart.Series[recordsTable.TableName + "Trend"].Points.DataBindXY(trendDurations,
                     trendDurations.Select(s => trend.Y(s)).ToArray());
             }
+        }
+
+        private void PaletteComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            BondsMapChart.ApplyPaletteColors();
+            foreach (var seria in BondsMapChart.Series.Where(seria => seria.Name.EndsWith("Trend")))
+                seria.Color = BondsMapChart.Series[seria.Name.Substring(0, seria.Name.IndexOf("Trend", StringComparison.Ordinal))].Color;
         }
     }
 }
