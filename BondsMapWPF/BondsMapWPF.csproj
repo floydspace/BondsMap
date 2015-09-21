@@ -34,7 +34,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Chart.ico</ApplicationIcon>
+    <ApplicationIcon>Images\Chart.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -127,10 +127,16 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Chart.ico" />
+    <Resource Include="Images\Chart.ico" />
   </ItemGroup>
   <ItemGroup>
-    <SplashScreen Include="ej8whtnurbgwnwy.png" />
+    <SplashScreen Include="Images\ej8whtnurbgwnwy.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\delete.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

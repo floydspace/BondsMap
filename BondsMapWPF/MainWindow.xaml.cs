@@ -34,8 +34,6 @@ namespace BondsMapWPF
             foreach (var existingXmlFile in existingXmlFiles) FillReportSet(existingXmlFile);
 
             FillCalendar();
-
-            CreateGroup("Группа " + ++_i);
         }
 
         private void CreateGroup(string s)
@@ -130,14 +128,22 @@ namespace BondsMapWPF
 
         private void AddAll_Click(object sender, RoutedEventArgs e)
         {
-            FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
-                .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+            if (GroupsComboBox.SelectedItem == null)
+                CreateGroup("Группа " + ++_i);
+
+            if (GroupsComboBox.SelectedItem != null)
+                FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
+                    .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
         }
 
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-            FoundedRecordsListBox.SelectedItems.Cast<DataRowView>().Select(s => s.Row)
-                .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+            if (GroupsComboBox.SelectedItem == null)
+                CreateGroup("Группа " + ++_i);
+
+            if (GroupsComboBox.SelectedItem != null)
+                FoundedRecordsListBox.SelectedItems.Cast<DataRowView>().Select(s => s.Row)
+                    .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
@@ -177,7 +183,15 @@ namespace BondsMapWPF
 
         private void GroupsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SelectedRecordsDataGrid.ItemsSource = e.AddedItems.Cast<DataTable>().First().DefaultView;
+            SelectedRecordsDataGrid.ItemsSource = e.AddedItems.Count > 0
+                ? e.AddedItems.Cast<DataTable>().First().DefaultView
+                : new DataView();
+        }
+
+        private void DeleteGroupButton_Click(object sender, RoutedEventArgs e)
+        {
+            GroupsComboBox.Items.Remove(GroupsComboBox.SelectedItem);
+            GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
     }
 }
