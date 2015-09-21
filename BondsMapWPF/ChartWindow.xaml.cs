@@ -23,8 +23,13 @@ namespace BondsMapWPF
             var minYield = notNullRecords.Min(s => Convert.ToDouble(s["YieldClose"]));
             var maxYield = notNullRecords.Max(s => Convert.ToDouble(s["YieldClose"]));
 
-            var minXScale = Convert.ToInt32(Math.Floor(minDuration/30d)*30);
-            var maxXScale = Convert.ToInt32(Math.Ceiling(maxDuration/30d)*30);
+            const double xInterval = 30.0;
+            const double yInterval = 1.0;
+
+            var minXScale = Convert.ToInt32(Math.Floor(minDuration/ xInterval) * xInterval);
+            var maxXScale = Convert.ToInt32(Math.Ceiling(maxDuration/ xInterval) * xInterval);
+            var minYScale = Math.Floor(minYield / yInterval) * yInterval;
+            var maxYScale = Math.Ceiling(maxYield / yInterval) * yInterval;
 
             BondsMapChart.ChartAreas.Add(new ChartArea("BondsMap")
             {
@@ -32,7 +37,7 @@ namespace BondsMapWPF
                 {
                     
                     Title = "Дюрация",
-                    Interval = 30,
+                    Interval = xInterval,
                     Minimum = minXScale,
                     Maximum = maxXScale,
                     MajorGrid =
@@ -44,9 +49,9 @@ namespace BondsMapWPF
                 AxisY =
                 {
                     Title = "Доходность",
-                    /*Interval = 1,
-                    Minimum = Math.Floor(minYield / 1d) * 1,
-                    Maximum = Math.Ceiling(maxYield / 1d) * 1,*/
+                    Interval = yInterval,
+                    Minimum = minYScale,
+                    Maximum = maxYScale,
                     MajorGrid =
                     {
                         LineColor = Color.LightGray, 
@@ -65,6 +70,9 @@ namespace BondsMapWPF
 
             foreach (var recordsTable in selectedRecordsTables)
             {
+                /*recordsTable.Columns.Add("ChartLabel", typeof (string),
+                    string.Format("SecShortName+' [{0}]'", recordsTable.TableName));*/
+
                 var notNullTable = recordsTable.AsEnumerable().
                     Where(w => !w.IsNull("Duration") && !w.IsNull("YieldClose")).ToArray();
 
@@ -87,7 +95,7 @@ namespace BondsMapWPF
                 var trendDurations = Enumerable.Range(minXScale == 0 ? 1 : minXScale, maxXScale).ToArray();
 
                 BondsMapChart.ApplyPaletteColors();
-                BondsMapChart.Series.Add(new Series(recordsTable.TableName + "Trend")
+                BondsMapChart.Series.Add(new Series(recordsTable.TableName + " (Тренд)")
                 {
                     Palette = ChartColorPalette.None,
                     ChartArea = "BondsMap",
@@ -95,16 +103,21 @@ namespace BondsMapWPF
                     Color = BondsMapChart.Series[recordsTable.TableName].Color,
                     MarkerStyle = MarkerStyle.None
                 });
-                BondsMapChart.Series[recordsTable.TableName + "Trend"].Points.DataBindXY(trendDurations,
+                BondsMapChart.Series[recordsTable.TableName + " (Тренд)"].Points.DataBindXY(trendDurations,
                     trendDurations.Select(s => trend.Y(s)).ToArray());
             }
+
+            BondsMapChart.Legends.Add(new Legend()
+            {
+                Docking = Docking.Bottom
+            });
         }
 
         private void PaletteComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             BondsMapChart.ApplyPaletteColors();
-            foreach (var seria in BondsMapChart.Series.Where(seria => seria.Name.EndsWith("Trend")))
-                seria.Color = BondsMapChart.Series[seria.Name.Substring(0, seria.Name.IndexOf("Trend", StringComparison.Ordinal))].Color;
+            foreach (var seria in BondsMapChart.Series.Where(seria => seria.Name.EndsWith(" (Тренд)")))
+                seria.Color = BondsMapChart.Series[seria.Name.Substring(0, seria.Name.IndexOf(" (Тренд)", StringComparison.Ordinal))].Color;
         }
     }
 }
