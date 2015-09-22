@@ -2,6 +2,7 @@
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Controls;
 using System.Windows.Forms.DataVisualization.Charting;
 
 namespace BondsMapWPF
@@ -118,6 +119,12 @@ namespace BondsMapWPF
             BondsMapChart.ApplyPaletteColors();
             foreach (var seria in BondsMapChart.Series.Where(seria => seria.Name.EndsWith(" (Тренд)")))
                 seria.Color = BondsMapChart.Series[seria.Name.Substring(0, seria.Name.IndexOf(" (Тренд)", StringComparison.Ordinal))].Color;
+        }
+
+        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            BondsMapChart.Printing.PageSetup();
+            BondsMapChart.Printing.PrintPreview();
         }
     }
 }
