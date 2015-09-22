@@ -5,9 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
-using System.Windows.Input;
 using System.Xml;
-using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MessageBox = System.Windows.Forms.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
@@ -40,6 +38,9 @@ namespace BondsMapWPF
         {
             var groupTable = _reportsSet.Tables["RECORDS"].Clone();
             groupTable.TableName = s;
+            foreach (DataColumn column in groupTable.Columns)
+                column.AllowDBNull = true;
+            
             GroupsComboBox.Items.Add(groupTable);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
@@ -162,16 +163,13 @@ namespace BondsMapWPF
             Remove_Click(null, null);
         }
 
-        private void SelectedRecordsDataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Delete)
-                MenuItem_Click(null, null);
-        }
-
         private void BuildBondsMapButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedRecordsTables = GroupsComboBox.Items.Cast<DataTable>().ToArray();
-            if (selectedRecordsTables.SelectMany(s => s.AsEnumerable()).All(w => w.IsNull("Duration") || w.IsNull("YieldClose"))) return;
+            foreach (var selectedRecordsTable in selectedRecordsTables)
+                selectedRecordsTable.AcceptChanges();
+            
+            if (selectedRecordsTables.SelectMany(s => s.AsEnumerable()).All(w => w.RowState == DataRowState.Deleted || w.IsNull("Duration") || w.IsNull("YieldClose"))) return;
             ChartWindow chartWindow = new ChartWindow(selectedRecordsTables);
             chartWindow.Show();
         }
@@ -192,6 +190,15 @@ namespace BondsMapWPF
         {
             GroupsComboBox.Items.Remove(GroupsComboBox.SelectedItem);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
+        }
+
+        private void AddNewRowButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GroupsComboBox.SelectedItem == null)
+                CreateGroup("Группа " + ++_i);
+
+            var table = ((DataView) SelectedRecordsDataGrid.ItemsSource).Table;
+            table.Rows.Add(table.NewRow());
         }
     }
 }

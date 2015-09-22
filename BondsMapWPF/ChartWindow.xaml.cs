@@ -16,7 +16,7 @@ namespace BondsMapWPF
             InitializeComponent();
 
             var notNullRecords = selectedRecordsTables.AsEnumerable().SelectMany(s=>s.AsEnumerable())
-                .Where(w => !w.IsNull("Duration") && !w.IsNull("YieldClose")).ToArray();
+                .Where(w => w.RowState != DataRowState.Deleted && !w.IsNull("Duration") && !w.IsNull("YieldClose")).ToArray();
 
             var minDuration = notNullRecords.Min(s => Convert.ToInt32(s["Duration"]));
             var maxDuration = notNullRecords.Max(s => Convert.ToInt32(s["Duration"]));
@@ -74,7 +74,7 @@ namespace BondsMapWPF
                     string.Format("SecShortName+' [{0}]'", recordsTable.TableName));*/
 
                 var notNullTable = recordsTable.AsEnumerable().
-                    Where(w => !w.IsNull("Duration") && !w.IsNull("YieldClose")).ToArray();
+                    Where(w => w.RowState != DataRowState.Deleted && !w.IsNull("Duration") && !w.IsNull("YieldClose")).ToArray();
 
                 if (!notNullTable.Any()) continue;
 

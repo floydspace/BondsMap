@@ -40,7 +40,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <DataGrid Grid.Row="1" Name="SelectedRecordsDataGrid" Margin="0,3,3,3" SelectionMode="Extended" CanUserAddRows="False" CanUserDeleteRows="False" CanUserResizeRows="False" HeadersVisibility="Column" IsReadOnly="True" GridLinesVisibility="None" AutoGenerateColumns="False" PreviewKeyDown="SelectedRecordsDataGrid_PreviewKeyDown">
+            <DataGrid Grid.Row="1" Name="SelectedRecordsDataGrid" Margin="0,3,3,3" SelectionMode="Extended" CanUserResizeRows="False" HeadersVisibility="Column" GridLinesVisibility="None" AutoGenerateColumns="False" CanUserAddRows="False">
                 <DataGrid.ContextMenu>
                     <ContextMenu>
                         <MenuItem Header="Удалить" Click="MenuItem_Click" InputGestureText="Del" />
@@ -59,14 +59,20 @@
             </DataGrid>
             <DockPanel Grid.Row="0" Margin="0,3,3,0">
                 <ComboBox Width="150" Name="GroupsComboBox" DisplayMemberPath="TableName" SelectionChanged="GroupsComboBox_SelectionChanged" />
-                <Button Name="CreateGroupButton" Click="CreateGroupButton_Click">
+                <Button Name="CreateGroupButton" Click="CreateGroupButton_Click" ToolTip="Создать группу">
                     <Button.Content>
                         <Image Source="Images/add.png" Stretch="None"/>
                     </Button.Content>
                 </Button>
-                <Button Name="DeleteGroupButton" Click="DeleteGroupButton_Click">
+                <Button Name="DeleteGroupButton" Click="DeleteGroupButton_Click" ToolTip="Удалить группу">
                     <Button.Content>
                         <Image Source="Images/delete.png" Stretch="None"/>
+                    </Button.Content>
+                </Button>
+                <Separator Margin="3"/>
+                <Button Name="AddNewRowButton" ToolTip="Добавить новую строку" Click="AddNewRowButton_Click">
+                    <Button.Content>
+                        <Image Source="Images/newrow.jpg" Stretch="None"/>
                     </Button.Content>
                 </Button>
                 <WrapPanel FlowDirection="RightToLeft">
