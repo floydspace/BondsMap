@@ -7,6 +7,7 @@
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <Button Content="Печать..." Click="Button_Click"/>
+            <Button Name="ExportToExcelButton" Content="Экспорт в Excel" Click="ExportToExcelButton_Click"/>
         </ToolBar>
         <Grid DockPanel.Dock="Bottom">
             <Grid.ColumnDefinitions>

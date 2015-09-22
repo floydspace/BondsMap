@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.DataVisualization.Charting;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace BondsMapWPF
 {
@@ -84,7 +87,7 @@ namespace BondsMapWPF
                     ChartArea = "BondsMap",
                     ChartType = SeriesChartType.Point,
                     MarkerStyle = MarkerStyle.Circle,
-                    MarkerSize = 8,
+                    MarkerSize = 7,
                     MarkerBorderColor = Color.Black
                 });
                 BondsMapChart.Series[recordsTable.TableName].Points.DataBind(notNullTable, "Duration", "YieldClose",
@@ -114,17 +117,115 @@ namespace BondsMapWPF
             });
         }
 
-        private void PaletteComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private void PaletteComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             BondsMapChart.ApplyPaletteColors();
             foreach (var seria in BondsMapChart.Series.Where(seria => seria.Name.EndsWith(" (Тренд)")))
                 seria.Color = BondsMapChart.Series[seria.Name.Substring(0, seria.Name.IndexOf(" (Тренд)", StringComparison.Ordinal))].Color;
         }
 
-        private void Button_Click(object sender, System.Windows.RoutedEventArgs e)
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
             BondsMapChart.Printing.PageSetup();
             BondsMapChart.Printing.PrintPreview();
+        }
+
+        private void ExportToExcelButton_Click(object sender, RoutedEventArgs e)
+        {
+            var excel = new Excel.Application { SheetsInNewWorkbook = 1 };
+
+            var newbook = excel.Workbooks.Add(Excel.XlWBATemplate.xlWBATChart);
+
+            Excel.Chart chart = newbook.Charts[1];
+            chart.ChartType = Excel.XlChartType.xlXYScatter;
+
+            List<double> allDurations = new List<double>();
+            List<double> allYields = new List<double>();
+
+            BondsMapChart.ApplyPaletteColors();
+            foreach (var bs in BondsMapChart.Series.Where(w => !w.Name.EndsWith(" (Тренд)")))
+            {
+                Excel.Series seria;
+
+                foreach (var bond in bs.Points)
+                {
+                    seria = chart.SeriesCollection().NewSeries();
+                    seria.XValues = bond.XValue;
+                    seria.Values = bond.YValues;
+                    seria.Name = bond.Label;
+                    seria.ApplyDataLabels(ShowSeriesName: true);
+
+                    seria.MarkerForegroundColor = (int)Excel.XlRgbColor.rgbBlack;
+                    seria.MarkerBackgroundColor = ColorTranslator.ToOle(bond.Color);
+                    seria.MarkerStyle = Excel.XlMarkerStyle.xlMarkerStyleCircle;
+                    seria.MarkerSize = 6;
+
+                    seria.DataLabels().ShowSeriesName = true;
+                    seria.DataLabels().ShowValue = false;
+                    seria.DataLabels().ShowCategoryName = false;
+                }
+
+                
+                seria = chart.SeriesCollection().NewSeries();
+                seria.XValues = bs.Points.Select(s => s.XValue).ToArray();
+                seria.Values = bs.Points.Select(s => s.YValues[0]).ToArray();
+                seria.Name = bs.Name;
+                Excel.Trendline trend = seria.Trendlines().Add(Type: Excel.XlTrendlineType.xlLogarithmic);
+                trend.Format.Line.ForeColor.RGB = ColorTranslator.ToOle(bs.Color);
+
+                seria.MarkerStyle = Excel.XlMarkerStyle.xlMarkerStyleNone;
+
+                allDurations.AddRange(bs.Points.Select(s => s.XValue));
+                allYields.AddRange(bs.Points.Select(s => s.YValues[0]));
+            }
+
+
+            chart.PlotArea.Interior.ColorIndex = Excel.XlColorIndex.xlColorIndexNone;
+            Excel.Axis axes = chart.Axes(Excel.XlAxisType.xlValue);
+            axes.HasMajorGridlines = true;
+            axes.HasMinorGridlines = true;
+            axes.MajorGridlines.Border.ColorIndex = 16;
+            axes.MajorGridlines.Border.Weight = Excel.XlBorderWeight.xlHairline;
+            axes.MajorGridlines.Border.LineStyle = Excel.XlLineStyle.xlDash;
+            axes.MinorGridlines.Border.ColorIndex = 48;
+            axes.MinorGridlines.Border.Weight = Excel.XlBorderWeight.xlHairline;
+            axes.MinorGridlines.Border.LineStyle = Excel.XlLineStyle.xlDot;
+            axes.MinimumScale = (int)(allYields.Min() / 0.5) * 0.5;
+            axes.MaximumScale = ((int)(allYields.Max() / 0.5) + 1) * 0.5;
+            axes.MinorUnit = 0.1;
+            axes.MajorUnit = 0.5;
+
+            axes = chart.Axes(Excel.XlAxisType.xlCategory);
+            axes.HasMajorGridlines = true;
+            axes.HasMinorGridlines = true;
+            axes.MajorGridlines.Border.ColorIndex = 16;
+            axes.MajorGridlines.Border.Weight = Excel.XlBorderWeight.xlHairline;
+            axes.MajorGridlines.Border.LineStyle = Excel.XlLineStyle.xlDash;
+            axes.MinorGridlines.Border.ColorIndex = 48;
+            axes.MinorGridlines.Border.Weight = Excel.XlBorderWeight.xlHairline;
+            axes.MinorGridlines.Border.LineStyle = Excel.XlLineStyle.xlDot;
+            axes.MinimumScale = allDurations.Min() / 30 * 30;
+            axes.MaximumScale = allDurations.Max() / 30 * 30;
+            axes.MinorUnit = 30;
+            axes.MajorUnit = 90;
+
+            chart.Location(Excel.XlChartLocation.xlLocationAsNewSheet);
+            chart.HasTitle = true;
+            chart.ChartTitle.Characters.Text = "Карта облигаций"; // + bs.Date.ToString("d");
+            chart.Axes(Excel.XlAxisType.xlCategory).HasTitle = true;
+            chart.Axes(Excel.XlAxisType.xlCategory).AxisTitle.Characters.Text = "Дюрация, дн.";
+            chart.Axes(Excel.XlAxisType.xlValue).HasTitle = true;
+            chart.Axes(Excel.XlAxisType.xlValue).AxisTitle.Characters.Text = "Доходность, %";
+            chart.HasLegend = false;
+
+            chart.PageSetup.LeftMargin = excel.InchesToPoints(0.393700787401575);
+            chart.PageSetup.RightMargin = excel.InchesToPoints(0.393700787401575);
+            chart.PageSetup.TopMargin = excel.InchesToPoints(0.393700787401575);
+            chart.PageSetup.BottomMargin = excel.InchesToPoints(0.393700787401575);
+            chart.PageSetup.HeaderMargin = excel.InchesToPoints(0.393700787401575);
+            chart.PageSetup.FooterMargin = excel.InchesToPoints(0.393700787401575);
+
+            excel.Visible = true;
         }
     }
 }
