@@ -84,15 +84,15 @@ namespace BondsMapWPF
                     ChartType = SeriesChartType.Point,
                     MarkerStyle = MarkerStyle.Circle,
                     MarkerSize = 8,
-                    MarkerBorderColor = Color.Black,
+                    MarkerBorderColor = Color.Black
                 });
                 BondsMapChart.Series[recordsTable.TableName].Points.DataBind(notNullTable, "Duration", "YieldClose",
-                    "ToolTip=ChartTip,Label=SecShortName");
+                    "ToolTip=ChartTip,Label=SecShortName,LabelToolTip=SecurityId");
 
-                Trend trend = new Trend(notNullTable.Select(s => Convert.ToInt32(s["Duration"])).ToList(),
+                var trend = new Trend(notNullTable.Select(s => Convert.ToInt32(s["Duration"])).ToList(),
                     notNullTable.Select(s => Convert.ToDouble(s["YieldClose"])).ToList(), Trend.Type.Logarithmic);
 
-                var trendDurations = Enumerable.Range(minXScale == 0 ? 1 : minXScale, maxXScale).ToArray();
+                var trendDurations = Enumerable.Range(1, maxXScale+1000).ToArray();
 
                 BondsMapChart.ApplyPaletteColors();
                 BondsMapChart.Series.Add(new Series(recordsTable.TableName + " (Тренд)")
@@ -107,7 +107,7 @@ namespace BondsMapWPF
                     trendDurations.Select(s => trend.Y(s)).ToArray());
             }
 
-            BondsMapChart.Legends.Add(new Legend()
+            BondsMapChart.Legends.Add(new Legend
             {
                 Docking = Docking.Bottom
             });
