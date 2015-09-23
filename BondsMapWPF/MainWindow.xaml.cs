@@ -24,8 +24,9 @@ namespace BondsMapWPF
 
             _reportsSet = new DataSet();
             _reportsSet.ReadXmlSchema("SEM21_02062014.xsd");
+            _reportsSet.Tables["BOARD"].Columns.Add("TradeDate", typeof(DateTime), @"Parent(SEM21_BOARD).TradeDate");
+            _reportsSet.Tables["RECORDS"].Columns.Add("TradeDate", typeof(DateTime), @"Parent(BOARD_RECORDS).TradeDate");
             _reportsSet.Tables["RECORDS"].Columns.Add("DurationYears", typeof(double), "Duration/365");
-            //_reportsSet.Tables["RECORDS"].Columns.Add("TradeDate", typeof(string), @"Parent(BOARD_RECORDS).BoardId");
             _reportsSet.Tables["RECORDS"].Columns.Add("ChartTip", typeof(string), @"'Доходность: '+YieldClose+' | Дюрация: '+Duration");
 
             var existingXmlFiles = Directory.GetFiles(Environment.CurrentDirectory, @"*_SEM21_*.xml");
@@ -36,10 +37,10 @@ namespace BondsMapWPF
 
         private void CreateGroup(string s)
         {
-            var groupTable = _reportsSet.Tables["RECORDS"].Clone();
-            groupTable.TableName = s;
-            foreach (DataColumn column in groupTable.Columns)
-                column.AllowDBNull = true;
+            var groupTable = new DataTable(s);
+            foreach (DataColumn column in _reportsSet.Tables["RECORDS"].Columns)
+                groupTable.Columns.Add(column.ColumnName, column.DataType,
+                    column.ColumnName.Equals("TradeDate") ? string.Empty : column.Expression);
             
             GroupsComboBox.Items.Add(groupTable);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
@@ -228,11 +229,11 @@ namespace BondsMapWPF
 
             const int columnNo = 0;
             var isins = lines.Select(s => s.Split(';').Count() > columnNo ? s.Split(';')[columnNo].Trim() : "")
-                    .Distinct().Where(w => w.Length == 12).ToArray();
+                    .Distinct().ToArray();
 
             if (GroupsComboBox.SelectedItem != null)
                 FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
-                    .Where(w => isins.Contains(w["SecurityId"]))
+                    .Where(w => isins.Contains(w["SecurityId"]) || isins.Contains(w["RegNumber"]))
                     .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
         }
     }
