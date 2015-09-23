@@ -48,6 +48,7 @@
                 </DataGrid.ContextMenu>
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="auto" Header="Дата" Binding="{Binding Path=TradeDate, StringFormat=dd.MM.yyyy}"/>
+                    <DataGridTextColumn Width="auto" Header="Режим" Binding="{Binding Path=BoardName}"/>
                     <DataGridTextColumn Width="*" Header="Код бумаги" Binding="{Binding Path=SecurityId}"/>
                     <DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding Path=SecShortName}"/>
                     <DataGridTextColumn Width="*" Header="Рег. номер" Binding="{Binding Path=RegNumber}"/>

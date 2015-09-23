@@ -26,6 +26,7 @@ namespace BondsMapWPF
             _reportsSet.ReadXmlSchema("SEM21_02062014.xsd");
             _reportsSet.Tables["BOARD"].Columns.Add("TradeDate", typeof(DateTime), @"Parent(SEM21_BOARD).TradeDate");
             _reportsSet.Tables["RECORDS"].Columns.Add("TradeDate", typeof(DateTime), @"Parent(BOARD_RECORDS).TradeDate");
+            _reportsSet.Tables["RECORDS"].Columns.Add("BoardName", typeof(string), @"Parent(BOARD_RECORDS).BoardName");
             _reportsSet.Tables["RECORDS"].Columns.Add("DurationYears", typeof(double), "Duration/365");
             _reportsSet.Tables["RECORDS"].Columns.Add("ChartTip", typeof(string), @"'Доходность: '+YieldClose+' | Дюрация: '+Duration");
 
@@ -40,7 +41,9 @@ namespace BondsMapWPF
             var groupTable = new DataTable(s);
             foreach (DataColumn column in _reportsSet.Tables["RECORDS"].Columns)
                 groupTable.Columns.Add(column.ColumnName, column.DataType,
-                    column.ColumnName.Equals("TradeDate") ? string.Empty : column.Expression);
+                    column.ColumnName.Equals("TradeDate") || column.ColumnName.Equals("BoardName")
+                        ? string.Empty
+                        : column.Expression);
             
             GroupsComboBox.Items.Add(groupTable);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
