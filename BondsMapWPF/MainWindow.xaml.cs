@@ -130,7 +130,9 @@ namespace BondsMapWPF
         private void AddAll_Click(object sender, RoutedEventArgs e)
         {
             if (GroupsComboBox.SelectedItem == null)
-                CreateGroup("Группа " + ++_i);
+                new InputBox(
+                string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
+                    " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
 
             if (GroupsComboBox.SelectedItem != null)
                 FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
@@ -140,7 +142,9 @@ namespace BondsMapWPF
         private void Add_Click(object sender, RoutedEventArgs e)
         {
             if (GroupsComboBox.SelectedItem == null)
-                CreateGroup("Группа " + ++_i);
+                new InputBox(
+                string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
+                    " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
 
             if (GroupsComboBox.SelectedItem != null)
                 FoundedRecordsListBox.SelectedItems.Cast<DataRowView>().Select(s => s.Row)
@@ -176,7 +180,9 @@ namespace BondsMapWPF
 
         private void CreateGroupButton_Click(object sender, RoutedEventArgs e)
         {
-            CreateGroup("Группа " + ++_i);
+            new InputBox(
+                string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
+                    " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
         }
 
         private void GroupsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -195,7 +201,10 @@ namespace BondsMapWPF
         private void AddNewRowButton_Click(object sender, RoutedEventArgs e)
         {
             if (GroupsComboBox.SelectedItem == null)
-                CreateGroup("Группа " + ++_i);
+                new InputBox(
+                    string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
+                        " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(
+                            this);
 
             var table = ((DataView) SelectedRecordsDataGrid.ItemsSource).Table;
             table.Rows.Add(table.NewRow());
