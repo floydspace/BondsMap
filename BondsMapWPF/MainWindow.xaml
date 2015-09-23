@@ -72,7 +72,12 @@
                 <Separator Margin="3"/>
                 <Button Name="AddNewRowButton" ToolTip="Добавить новую строку" Click="AddNewRowButton_Click">
                     <Button.Content>
-                        <Image Source="Images/newrow.jpg" Stretch="None"/>
+                        <Image Source="Images/newrow.png" Stretch="Fill" MaxHeight="16" MaxWidth="16"/>
+                    </Button.Content>
+                </Button>
+                <Button Name="ImportFromExcelButton" ToolTip="Импорт списка бумаг из CSV файла" Click="ImportFromExcelButton_Click">
+                    <Button.Content>
+                        <Image Source="Images/importExcel.png" MaxWidth="16" Stretch="Fill" MaxHeight="16"/>
                     </Button.Content>
                 </Button>
                 <WrapPanel FlowDirection="RightToLeft">

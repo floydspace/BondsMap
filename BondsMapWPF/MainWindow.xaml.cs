@@ -209,5 +209,31 @@ namespace BondsMapWPF
             var table = ((DataView) SelectedRecordsDataGrid.ItemsSource).Table;
             table.Rows.Add(table.NewRow());
         }
+
+        private void ImportFromExcelButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (GroupsComboBox.SelectedItem == null)
+                new InputBox(
+                    string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
+                        " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(
+                            this);
+
+            var ofd = new OpenFileDialog
+            {
+                Filter = "Файлы CSV|*.csv"
+            };
+            if (ofd.ShowDialog() != true) return;
+
+            var lines = File.ReadAllLines(ofd.FileName);
+
+            const int columnNo = 0;
+            var isins = lines.Select(s => s.Split(';').Count() > columnNo ? s.Split(';')[columnNo].Trim() : "")
+                    .Distinct().Where(w => w.Length == 12).ToArray();
+
+            if (GroupsComboBox.SelectedItem != null)
+                FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
+                    .Where(w => isins.Contains(w["SecurityId"]))
+                    .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+        }
     }
 }
