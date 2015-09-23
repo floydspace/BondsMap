@@ -17,7 +17,22 @@
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <Button Content="Загрузить SEM21 отчеты" Name="LoadReportsButton" Margin="3,3,3,0" Click="LoadReportsButton_Click"/>
-            <Calendar Grid.Row="1" x:Name="CalendarReports" Margin="3,0" IsEnabled="False" SelectedDatesChanged="CalendarReports_SelectedDatesChanged"/>
+            <Calendar Grid.Row="1" x:Name="CalendarReports" Margin="3,0" SelectedDatesChanged="CalendarReports_SelectedDatesChanged" GotMouseCapture="CalendarReports_GotMouseCapture" IsEnabled="False">
+                <Calendar.CalendarDayButtonStyle>
+                    <Style TargetType="CalendarDayButton" BasedOn="{StaticResource {x:Type CalendarDayButton}}">
+                        <Style.Triggers>
+                            <Trigger Property="IsBlackedOut" Value="False">
+                                <Setter Property="Background" Value="LightBlue"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="DeepSkyBlue"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Calendar.CalendarDayButtonStyle>
+            </Calendar>
             <TextBox Grid.Row="2" Name="SearchTextBox" Margin="3,0,3,0" TextChanged="SearchTextBox_TextChanged"/>
             <ListBox Grid.Row="3" Name="FoundedRecordsListBox" DisplayMemberPath="SecShortName" Margin="3" SelectionMode="Extended"/>
             <Grid Grid.Row="4">

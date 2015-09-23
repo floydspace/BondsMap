@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
+using System.Windows.Input;
 using System.Xml;
 using MessageBox = System.Windows.Forms.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
@@ -238,6 +239,12 @@ namespace BondsMapWPF
                 FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
                     .Where(w => isins.Contains(w["SecurityId"]) || isins.Contains(w["RegNumber"]))
                     .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+        }
+
+        private void CalendarReports_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            if (Mouse.Captured is Calendar || Mouse.Captured is System.Windows.Controls.Primitives.CalendarItem)
+                Mouse.Capture(null);
         }
     }
 }
