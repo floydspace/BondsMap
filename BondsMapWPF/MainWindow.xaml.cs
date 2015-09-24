@@ -139,9 +139,13 @@ namespace BondsMapWPF
                 string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
                     " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
 
-            if (GroupsComboBox.SelectedItem != null)
-                FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
-                    .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+            if (GroupsComboBox.SelectedItem == null) return;
+            ((DataTable)GroupsComboBox.SelectedItem).AcceptChanges();
+            FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
+                .Where(w => !((DataTable) GroupsComboBox.SelectedItem).Rows.Cast<DataRow>()
+                    .Any(row => (string)row["BoardName"] == (string)w["BoardName"] &&
+                                (string)row["SecurityId"] == (string)w["SecurityId"]))
+                .CopyToDataTable((DataTable) GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
         }
 
         private void Add_Click(object sender, RoutedEventArgs e)
@@ -151,9 +155,13 @@ namespace BondsMapWPF
                 string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
                     " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
 
-            if (GroupsComboBox.SelectedItem != null)
-                FoundedRecordsListBox.SelectedItems.Cast<DataRowView>().Select(s => s.Row)
-                    .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+            if (GroupsComboBox.SelectedItem == null) return;
+            ((DataTable)GroupsComboBox.SelectedItem).AcceptChanges();
+            FoundedRecordsListBox.SelectedItems.Cast<DataRowView>().Select(s => s.Row)
+                .Where(w => !((DataTable)GroupsComboBox.SelectedItem).Rows.Cast<DataRow>()
+                    .Any(row => (string)row["BoardName"] == (string)w["BoardName"] &&
+                                (string)row["SecurityId"] == (string)w["SecurityId"]))
+                .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
@@ -239,10 +247,14 @@ namespace BondsMapWPF
             }).Select(s => s.Split(';')[columnNo].Trim())
                 .Distinct().ToArray();
 
-            if (GroupsComboBox.SelectedItem != null)
-                FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
-                    .Where(w => isins.Contains(w["SecurityId"]) || isins.Contains(w["RegNumber"]))
-                    .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+            if (GroupsComboBox.SelectedItem == null) return;
+            ((DataTable)GroupsComboBox.SelectedItem).AcceptChanges();
+            FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
+                .Where(w => isins.Contains(w["SecurityId"]) || isins.Contains(w["RegNumber"]))
+                .Where(w => !((DataTable)GroupsComboBox.SelectedItem).Rows.Cast<DataRow>()
+                    .Any(row => (string)row["BoardName"] == (string)w["BoardName"] &&
+                                (string)row["SecurityId"] == (string)w["SecurityId"]))
+                .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
         }
 
         private void CalendarReports_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
