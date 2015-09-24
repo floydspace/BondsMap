@@ -118,11 +118,11 @@ namespace BondsMapWPF
             var report = _reportsSet.Tables["SEM21"].AsEnumerable().First(w => w["TradeDate"].Equals(CalendarReports.SelectedDate));
             var boards = report.GetChildRows("SEM21_BOARD").Where(w => w["BoardType"].Equals("MAIN"));
             var records = boards.SelectMany(s => s.GetChildRows("BOARD_RECORDS")).Where(w => w["SecurityType"].Equals("об"));
-            var foundedRecords = records.Where(w =>
-                        ((string)w["SecurityId"]).ToLowerInvariant().Contains(SearchTextBox.Text.ToLowerInvariant()) ||
-                        ((string)w["SecShortName"]).ToLowerInvariant().Contains(SearchTextBox.Text.ToLowerInvariant()) ||
-                        ((string)w["EngName"]).ToLowerInvariant().Contains(SearchTextBox.Text.ToLowerInvariant()) ||
-                        ((string)w["RegNumber"]).ToLowerInvariant().Contains(SearchTextBox.Text.ToLowerInvariant())).ToArray();
+
+            var expressions = SearchTextBox.Text.Split(new[] {' ', ',', ';'}, StringSplitOptions.RemoveEmptyEntries);
+            var foundedRecords = records.Where(w => expressions.All(expression => 
+                new[]{(string) w["SecurityId"], (string) w["SecShortName"], (string) w["EngName"], (string) w["RegNumber"]}
+                .Any(tm => tm.ToLowerInvariant().Contains(expression.ToLowerInvariant())))).ToArray();
 
             FoundedRecordsListBox.ItemsSource = foundedRecords.Any() ? foundedRecords.CopyToDataTable().DefaultView : new DataView();
         }
