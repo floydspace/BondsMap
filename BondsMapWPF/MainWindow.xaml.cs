@@ -232,8 +232,12 @@ namespace BondsMapWPF
             var lines = File.ReadAllLines(ofd.FileName);
 
             const int columnNo = 0;
-            var isins = lines.Select(s => s.Split(';').Count() > columnNo ? s.Split(';')[columnNo].Trim() : "")
-                    .Distinct().ToArray();
+            var isins = lines.Where(w =>
+            {
+                var temp = w.Split(';');
+                return temp.Length > columnNo && temp[columnNo] != string.Empty;
+            }).Select(s => s.Split(';')[columnNo].Trim())
+                .Distinct().ToArray();
 
             if (GroupsComboBox.SelectedItem != null)
                 FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
