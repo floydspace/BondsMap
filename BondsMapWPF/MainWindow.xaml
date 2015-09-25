@@ -87,6 +87,12 @@
                     </Button.Content>
                 </Button>
                 <Separator Margin="3"/>
+                <Button Name="FavoritesButton" ToolTip="Добавить группу в избранное" Click="FavoritesButton_Click">
+                    <Button.Content>
+                        <Image Source="Images/favorAdd.jpg" Stretch="Fill" MaxHeight="16" MaxWidth="16"/>
+                    </Button.Content>
+                </Button>
+                <Separator Margin="3"/>
                 <Button Name="AddNewRowButton" ToolTip="Добавить новую строку" Click="AddNewRowButton_Click">
                     <Button.Content>
                         <Image Source="Images/newrow.png" Stretch="Fill" MaxHeight="16" MaxWidth="16"/>

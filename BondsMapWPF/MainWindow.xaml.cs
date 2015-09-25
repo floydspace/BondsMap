@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using System.Xml;
 using MessageBox = System.Windows.Forms.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
@@ -35,6 +36,16 @@ namespace BondsMapWPF
             foreach (var existingXmlFile in existingXmlFiles) FillReportSet(existingXmlFile);
 
             FillCalendar();
+
+            var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
+            if (!Directory.Exists(favoritesDirectory)) return;
+            foreach (var favoritesFile in Directory.GetFiles(favoritesDirectory))
+            {
+                var groupTable = new DataTable();
+                groupTable.ReadXml(favoritesFile);
+                GroupsComboBox.Items.Add(groupTable);
+                GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
+            }
         }
 
         private void CreateGroup(string s)
@@ -187,8 +198,7 @@ namespace BondsMapWPF
                 selectedRecordsTable.AcceptChanges();
             
             if (selectedRecordsTables.SelectMany(s => s.AsEnumerable()).All(w => w.RowState == DataRowState.Deleted || w.IsNull("Duration") || w.IsNull("YieldClose"))) return;
-            ChartWindow chartWindow = new ChartWindow(selectedRecordsTables);
-            chartWindow.Show();
+            new ChartWindow(selectedRecordsTables).Show();
         }
 
         private void CreateGroupButton_Click(object sender, RoutedEventArgs e)
@@ -203,10 +213,20 @@ namespace BondsMapWPF
             SelectedRecordsDataGrid.ItemsSource = e.AddedItems.Count > 0
                 ? e.AddedItems.Cast<DataTable>().First().DefaultView
                 : new DataView();
+
+            ((Image)FavoritesButton.Content).Source = !IsInFavorites
+                    ? new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute))
+                    : new BitmapImage(new Uri(@"pack://application:,,,/Images/favorRemove.jpg", UriKind.RelativeOrAbsolute));
         }
 
         private void DeleteGroupButton_Click(object sender, RoutedEventArgs e)
         {
+            var selectedTable = GroupsComboBox.SelectedItem as DataTable;
+            if (selectedTable == null) return;
+            var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
+            var fileName = Path.Combine(favoritesDirectory, selectedTable.TableName + ".xml");
+            if (File.Exists(fileName)) File.Delete(fileName);
+
             GroupsComboBox.Items.Remove(GroupsComboBox.SelectedItem);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
@@ -261,6 +281,39 @@ namespace BondsMapWPF
         {
             if (Mouse.Captured is Calendar || Mouse.Captured is System.Windows.Controls.Primitives.CalendarItem)
                 Mouse.Capture(null);
+        }
+
+        public bool IsInFavorites {
+            get
+            {
+                var selectedTable = GroupsComboBox.SelectedItem as DataTable;
+                if (selectedTable == null) return false;
+
+                var fileName = Path.Combine(Environment.CurrentDirectory, "Favorites", selectedTable.TableName + ".xml");
+                return File.Exists(fileName);
+            }
+        }
+
+        private void FavoritesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedTable = GroupsComboBox.SelectedItem as DataTable;
+            if (selectedTable == null) return;
+
+            var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
+            var fileName = Path.Combine(favoritesDirectory, selectedTable.TableName + ".xml");
+            if (File.Exists(fileName))
+            {
+                File.Delete(fileName);
+                ((Image)FavoritesButton.Content).Source =
+                new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute));
+            }
+            else
+            {
+                Directory.CreateDirectory(favoritesDirectory);
+                selectedTable.WriteXml(fileName, XmlWriteMode.WriteSchema);
+                ((Image)FavoritesButton.Content).Source =
+                new BitmapImage(new Uri(@"pack://application:,,,/Images/favorRemove.jpg", UriKind.RelativeOrAbsolute));
+            }
         }
     }
 }

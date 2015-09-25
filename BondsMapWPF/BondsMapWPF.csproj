@@ -153,6 +153,8 @@
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <Resource Include="Images\favorAdd.jpg" />
+    <Resource Include="Images\favorRemove.jpg" />
     <Content Include="SEM21_02062014.xsd">
       <SubType>Designer</SubType>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
