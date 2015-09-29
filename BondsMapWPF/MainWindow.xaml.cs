@@ -1,43 +1,162 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using System.Xml;
+using FloydSpace.MICEX.Portable;
 using MessageBox = System.Windows.Forms.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace BondsMapWPF
 {
+    class BondsGroup
+    {
+        public string TableName { get; set; }
+        public ObservableCollection<Bond> BondItems { get; set; }
+    }
+
+    class Bond : INotifyPropertyChanged 
+    {
+        private DateTime _tradeDate;
+        private string _boardName;
+        private string _securityId;
+        private string _secShortName;
+        private string _regNumber;
+        private string _currencyId;
+        private double _yieldClose;
+        private int _duration;
+        private double _durationYears;
+        private DateTime _matDate;
+
+        public DateTime TradeDate
+        {
+            get { return _tradeDate; }
+            set
+            {
+                _tradeDate = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("TradeDate"));
+            }
+        }
+
+        public string BoardName
+        {
+            get { return _boardName; }
+            set
+            {
+                _boardName = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("BoardName"));
+            }
+        }
+
+        public string SecurityId
+        {
+            get { return _securityId; }
+            set
+            {
+                _securityId = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SecurityId"));
+            }
+        }
+
+        public string SecShortName
+        {
+            get { return _secShortName; }
+            set
+            {
+                _secShortName = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("SecShortName"));
+            }
+        }
+
+        public string RegNumber
+        {
+            get { return _regNumber; }
+            set
+            {
+                _regNumber = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("RegNumber"));
+            }
+        }
+
+        public string CurrencyId
+        {
+            get { return _currencyId; }
+            set
+            {
+                _currencyId = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("CurrencyId"));
+            }
+        }
+
+        public double YieldClose
+        {
+            get { return _yieldClose; }
+            set
+            {
+                _yieldClose = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("YieldClose"));
+            }
+        }
+
+        public int Duration
+        {
+            get { return _duration; }
+            set
+            {
+                _duration = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("Duration"));
+            }
+        }
+
+        public double DurationYears
+        {
+            get { return _durationYears; }
+            set
+            {
+                _durationYears = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("DurationYears"));
+            }
+        }
+
+        public DateTime MatDate
+        {
+            get { return _matDate; }
+            set
+            {
+                _matDate = value;
+                OnPropertyChanged(new PropertyChangedEventArgs("MatDate"));
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+        public void OnPropertyChanged(PropertyChangedEventArgs e)
+        {
+            if (PropertyChanged != null)
+                PropertyChanged(this, e);
+        }
+    }
+
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
     public partial class MainWindow
     {
-        private readonly DataSet _reportsSet;
         private int _i;
         public MainWindow()
         {
             InitializeComponent();
 
-            _reportsSet = new DataSet();
-            _reportsSet.ReadXmlSchema("SEM21_02062014.xsd");
-            _reportsSet.Tables["BOARD"].Columns.Add("TradeDate", typeof(DateTime), @"Parent(SEM21_BOARD).TradeDate");
-            _reportsSet.Tables["RECORDS"].Columns.Add("TradeDate", typeof(DateTime), @"Parent(BOARD_RECORDS).TradeDate");
-            _reportsSet.Tables["RECORDS"].Columns.Add("BoardName", typeof(string), @"Parent(BOARD_RECORDS).BoardName");
-            _reportsSet.Tables["RECORDS"].Columns.Add("DurationYears", typeof(double), "Duration/365");
-            _reportsSet.Tables["RECORDS"].Columns.Add("ChartTip", typeof(string), @"'Доходность: '+YieldClose+' | Дюрация: '+Duration");
-
-            var existingXmlFiles = Directory.GetFiles(Environment.CurrentDirectory, @"*_SEM21_*.xml");
-            foreach (var existingXmlFile in existingXmlFiles) FillReportSet(existingXmlFile);
-
-            FillCalendar();
-
-            var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
+            CalendarReports.SelectedDate = DateTime.Today;
+            /*var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
             if (!Directory.Exists(favoritesDirectory)) return;
             foreach (var favoritesFile in Directory.GetFiles(favoritesDirectory))
             {
@@ -45,105 +164,24 @@ namespace BondsMapWPF
                 groupTable.ReadXml(favoritesFile);
                 GroupsComboBox.Items.Add(groupTable);
                 GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
-            }
+            }*/
         }
 
         private void CreateGroup(string s)
         {
-            var groupTable = new DataTable(s);
-            foreach (DataColumn column in _reportsSet.Tables["RECORDS"].Columns)
-                groupTable.Columns.Add(column.ColumnName, column.DataType,
-                    column.ColumnName.Equals("TradeDate") || column.ColumnName.Equals("BoardName")
-                        ? string.Empty
-                        : column.Expression);
-            
-            GroupsComboBox.Items.Add(groupTable);
+            var bondsGroup = new BondsGroup { TableName = s, BondItems = new ObservableCollection<Bond>() };
+            GroupsComboBox.Items.Add(bondsGroup);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
 
-        private void FillCalendar()
+        private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (!_reportsSet.Tables.Contains("SEM21")) return;
-
-            var availableDates = _reportsSet.Tables["SEM21"].AsEnumerable().Select(s => (DateTime)s["TradeDate"]);
-
-            if (!availableDates.Any()) return;
-
-            var startDate = availableDates.Min();
-            var endDate = availableDates.Max();
-            CalendarReports.DisplayDateStart = startDate;
-            CalendarReports.DisplayDateEnd = endDate;
-            CalendarReports.DisplayDate = endDate;
-            CalendarReports.BlackoutDates.Clear();
-            for (var date = startDate; date <= endDate; date = date.AddDays(1))
-                if (!availableDates.Contains(date)) CalendarReports.BlackoutDates.Add(new CalendarDateRange(date));
-
-            CalendarReports.IsEnabled = true;
-            CalendarReports.SelectedDate = endDate;
+            if (SearchTextBox.Text.Length < 3) return;
+            var securities = await MicexGrabber.FindSecuritiesAsync(SearchTextBox.Text);
+            FoundedRecordsListBox.ItemsSource = securities.Where(w=>w.Group.Contains("bonds")).OrderBy(o=>o.ShortName);
         }
 
-        private bool FillReportSet(string xmlFile)
-        {
-            try
-            {
-                _reportsSet.ReadXml(xmlFile);
-                return true;
-            }
-            catch (XmlException xmlEx)
-            {
-                MessageBox.Show(string.Format("Файл {0} не является файлом биржевой информации (SEM21)",
-                    Path.GetFileName(xmlFile)), xmlEx.Source,
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return false;
-            }
-        }
-
-        private void LoadReportsButton_Click(object sender, RoutedEventArgs e)
-        {
-            var ofd = new OpenFileDialog
-            {
-                Multiselect = true,
-                Filter = "Файлы биржевой информации (SEM21)|*_SEM21_*.xml"
-            };
-            if (ofd.ShowDialog() != true) return;
-
-            foreach (var fileName in ofd.FileNames)
-            {
-                if (!FillReportSet(fileName)) continue;
-                var fileShortName = Path.GetFileName(fileName);
-                if (fileShortName != null && !File.Exists(Path.Combine(Environment.CurrentDirectory, fileShortName)))
-                    File.Copy(fileName, Path.Combine(Environment.CurrentDirectory, fileShortName));
-            }
-
-            FillCalendar();
-        }
-
-        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            FillFoundedRecordsListBox();
-        }
-
-        private void FillFoundedRecordsListBox()
-        {
-            if (!CalendarReports.IsEnabled) return;
-            var report = _reportsSet.Tables["SEM21"].AsEnumerable().First(w => w["TradeDate"].Equals(CalendarReports.SelectedDate));
-            var boards = report.GetChildRows("SEM21_BOARD").Where(w => w["BoardType"].Equals("MAIN"));
-            var records = boards.SelectMany(s => s.GetChildRows("BOARD_RECORDS")).Where(w => w["SecurityType"].Equals("об"));
-
-            var expressions = SearchTextBox.Text.Split(new[] {' ', ',', ';'}, StringSplitOptions.RemoveEmptyEntries);
-            var foundedRecords = records.Where(w => expressions.All(expression => 
-                new[]{(string) w["SecurityId"], (string) w["SecShortName"], (string) w["EngName"], (string) w["RegNumber"]}
-                .Any(tm => tm.ToLowerInvariant().Contains(expression.ToLowerInvariant())))).ToArray();
-
-            FoundedRecordsListBox.ItemsSource = foundedRecords.Any() ? foundedRecords.CopyToDataTable().DefaultView : new DataView();
-        }
-
-        private void CalendarReports_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
-        {
-            FillFoundedRecordsListBox();
-        }
-
-        private void AddAll_Click(object sender, RoutedEventArgs e)
+        private async void AddAll_Click(object sender, RoutedEventArgs e)
         {
             if (GroupsComboBox.SelectedItem == null)
                 new InputBox(
@@ -151,15 +189,30 @@ namespace BondsMapWPF
                     " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
 
             if (GroupsComboBox.SelectedItem == null) return;
-            ((DataTable)GroupsComboBox.SelectedItem).AcceptChanges();
-            FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
-                .Where(w => !((DataTable) GroupsComboBox.SelectedItem).Rows.Cast<DataRow>()
-                    .Any(row => (string)row["BoardName"] == (string)w["BoardName"] &&
-                                (string)row["SecurityId"] == (string)w["SecurityId"]))
-                .CopyToDataTable((DataTable) GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+            foreach (MicexGrabber.SecurityItem item in FoundedRecordsListBox.Items)
+            {
+                var bond = new Bond
+                {
+                    TradeDate = CalendarReports.SelectedDate ?? DateTime.Now,
+                    SecurityId = item.SecId,
+                    SecShortName = item.ShortName,
+                    RegNumber = item.RegNumber
+                };
+                var board = (await MicexGrabber.GetSecurityBoardsAsync(bond.SecurityId)).First();
+                bond.BoardName = board.Title;
+                var boardGroupInfo = await MicexGrabber.GetBoardGroupInfoAsync(board.BoardGroupId, bond.SecurityId);
+                var marketData = await MicexGrabber.GetMarketDataAsync(bond.TradeDate, bond.SecurityId, boardGroupInfo);
+                bond.YieldClose = marketData.YieldClose ?? new double();
+                bond.Duration = marketData.Duration ?? new int();
+                bond.DurationYears = bond.Duration / 365d;
+                bond.CurrencyId = marketData.CurrencyId;
+                bond.MatDate = marketData.MatDate ?? new DateTime();
+
+                ((BondsGroup) GroupsComboBox.SelectedItem).BondItems.Add(bond);
+            }
         }
 
-        private void Add_Click(object sender, RoutedEventArgs e)
+        private async void Add_Click(object sender, RoutedEventArgs e)
         {
             if (GroupsComboBox.SelectedItem == null)
                 new InputBox(
@@ -167,12 +220,27 @@ namespace BondsMapWPF
                     " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
 
             if (GroupsComboBox.SelectedItem == null) return;
-            ((DataTable)GroupsComboBox.SelectedItem).AcceptChanges();
-            FoundedRecordsListBox.SelectedItems.Cast<DataRowView>().Select(s => s.Row)
-                .Where(w => !((DataTable)GroupsComboBox.SelectedItem).Rows.Cast<DataRow>()
-                    .Any(row => (string)row["BoardName"] == (string)w["BoardName"] &&
-                                (string)row["SecurityId"] == (string)w["SecurityId"]))
-                .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+            foreach (MicexGrabber.SecurityItem item in FoundedRecordsListBox.SelectedItems)
+            {
+                var bond = new Bond
+                {
+                    TradeDate = CalendarReports.SelectedDate ?? DateTime.Now,
+                    SecurityId = item.SecId,
+                    SecShortName = item.ShortName,
+                    RegNumber = item.RegNumber
+                };
+                var board = (await MicexGrabber.GetSecurityBoardsAsync(bond.SecurityId)).First();
+                bond.BoardName = board.Title;
+                var boardGroupInfo = await MicexGrabber.GetBoardGroupInfoAsync(board.BoardGroupId, bond.SecurityId);
+                var marketData = await MicexGrabber.GetMarketDataAsync(bond.TradeDate, bond.SecurityId, boardGroupInfo);
+                bond.YieldClose = marketData.YieldClose ?? new double();
+                bond.Duration = marketData.Duration ?? new int();
+                bond.DurationYears = bond.Duration / 365d;
+                bond.CurrencyId = marketData.CurrencyId;
+                bond.MatDate = marketData.MatDate ?? new DateTime();
+
+                ((BondsGroup)GroupsComboBox.SelectedItem).BondItems.Add(bond);
+            }
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
@@ -211,8 +279,8 @@ namespace BondsMapWPF
         private void GroupsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SelectedRecordsDataGrid.ItemsSource = e.AddedItems.Count > 0
-                ? e.AddedItems.Cast<DataTable>().First().DefaultView
-                : new DataView();
+                ? e.AddedItems.Cast<BondsGroup>().First().BondItems
+                : new ObservableCollection<Bond>();
 
             ((Image)FavoritesButton.Content).Source = !IsInFavorites
                     ? new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute))
