@@ -1,43 +1,39 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using System.Xml;
 using FloydSpace.MICEX.Portable;
-using MessageBox = System.Windows.Forms.MessageBox;
-using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using Microsoft.Win32;
 
 namespace BondsMapWPF
 {
-    class BondsGroup
+    public class BondsGroup
     {
         public string TableName { get; set; }
         public ObservableCollection<Bond> BondItems { get; set; }
     }
 
-    class Bond : INotifyPropertyChanged 
+    public class Bond : INotifyPropertyChanged 
     {
-        private DateTime _tradeDate;
+        private DateTime? _tradeDate;
         private string _boardName;
         private string _securityId;
         private string _secShortName;
         private string _regNumber;
         private string _currencyId;
-        private double _yieldClose;
-        private int _duration;
-        private double _durationYears;
-        private DateTime _matDate;
+        private double? _yieldClose;
+        private int? _duration;
+        private double? _durationYears;
+        private DateTime? _matDate;
 
-        public DateTime TradeDate
+        public DateTime? TradeDate
         {
             get { return _tradeDate; }
             set
@@ -97,7 +93,7 @@ namespace BondsMapWPF
             }
         }
 
-        public double YieldClose
+        public double? YieldClose
         {
             get { return _yieldClose; }
             set
@@ -107,7 +103,7 @@ namespace BondsMapWPF
             }
         }
 
-        public int Duration
+        public int? Duration
         {
             get { return _duration; }
             set
@@ -117,7 +113,7 @@ namespace BondsMapWPF
             }
         }
 
-        public double DurationYears
+        public double? DurationYears
         {
             get { return _durationYears; }
             set
@@ -127,7 +123,7 @@ namespace BondsMapWPF
             }
         }
 
-        public DateTime MatDate
+        public DateTime? MatDate
         {
             get { return _matDate; }
             set
@@ -189,27 +185,32 @@ namespace BondsMapWPF
                     " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
 
             if (GroupsComboBox.SelectedItem == null) return;
+
+            ProgressImage.Visibility = Visibility.Visible;
+            Grid1.IsEnabled = false;
             foreach (MicexGrabber.SecurityItem item in FoundedRecordsListBox.Items)
             {
                 var bond = new Bond
                 {
-                    TradeDate = CalendarReports.SelectedDate ?? DateTime.Now,
+                    TradeDate = CalendarReports.SelectedDate,
                     SecurityId = item.SecId,
                     SecShortName = item.ShortName,
                     RegNumber = item.RegNumber
                 };
-                var board = (await MicexGrabber.GetSecurityBoardsAsync(bond.SecurityId)).First();
-                bond.BoardName = board.Title;
-                var boardGroupInfo = await MicexGrabber.GetBoardGroupInfoAsync(board.BoardGroupId, bond.SecurityId);
-                var marketData = await MicexGrabber.GetMarketDataAsync(bond.TradeDate, bond.SecurityId, boardGroupInfo);
-                bond.YieldClose = marketData.YieldClose ?? new double();
-                bond.Duration = marketData.Duration ?? new int();
+                var secBoardGroup = (await MicexGrabber.GetSecurityBoardGroupsAsync(bond.SecurityId)).First();
+                var boardGroupInfo = await MicexGrabber.GetBoardGroupInfoAsync(secBoardGroup.Id, bond.SecurityId);
+                bond.BoardName = boardGroupInfo.BoardItem.Title;
+                var marketData = await MicexGrabber.GetMarketDataAsync(bond.TradeDate ?? DateTime.Now, bond.SecurityId, boardGroupInfo);
+                bond.YieldClose = marketData.YieldClose;
+                bond.Duration = marketData.Duration;
                 bond.DurationYears = bond.Duration / 365d;
                 bond.CurrencyId = marketData.CurrencyId;
-                bond.MatDate = marketData.MatDate ?? new DateTime();
+                bond.MatDate = marketData.MatDate;
 
                 ((BondsGroup) GroupsComboBox.SelectedItem).BondItems.Add(bond);
             }
+            ProgressImage.Visibility = Visibility.Hidden;
+            Grid1.IsEnabled = true;
         }
 
         private async void Add_Click(object sender, RoutedEventArgs e)
@@ -220,38 +221,43 @@ namespace BondsMapWPF
                     " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
 
             if (GroupsComboBox.SelectedItem == null) return;
+
+            ProgressImage.Visibility = Visibility.Visible;
+            Grid1.IsEnabled = false;
             foreach (MicexGrabber.SecurityItem item in FoundedRecordsListBox.SelectedItems)
             {
                 var bond = new Bond
                 {
-                    TradeDate = CalendarReports.SelectedDate ?? DateTime.Now,
+                    TradeDate = CalendarReports.SelectedDate,
                     SecurityId = item.SecId,
                     SecShortName = item.ShortName,
                     RegNumber = item.RegNumber
                 };
-                var board = (await MicexGrabber.GetSecurityBoardsAsync(bond.SecurityId)).First();
-                bond.BoardName = board.Title;
-                var boardGroupInfo = await MicexGrabber.GetBoardGroupInfoAsync(board.BoardGroupId, bond.SecurityId);
-                var marketData = await MicexGrabber.GetMarketDataAsync(bond.TradeDate, bond.SecurityId, boardGroupInfo);
-                bond.YieldClose = marketData.YieldClose ?? new double();
-                bond.Duration = marketData.Duration ?? new int();
+                var secBoardGroup = (await MicexGrabber.GetSecurityBoardGroupsAsync(bond.SecurityId)).First();
+                var boardGroupInfo = await MicexGrabber.GetBoardGroupInfoAsync(secBoardGroup.Id, bond.SecurityId);
+                bond.BoardName = boardGroupInfo.BoardItem.Title;
+                var marketData = await MicexGrabber.GetMarketDataAsync(bond.TradeDate ?? DateTime.Now, bond.SecurityId, boardGroupInfo);
+                bond.YieldClose = marketData.YieldClose;
+                bond.Duration = marketData.Duration;
                 bond.DurationYears = bond.Duration / 365d;
                 bond.CurrencyId = marketData.CurrencyId;
-                bond.MatDate = marketData.MatDate ?? new DateTime();
+                bond.MatDate = marketData.MatDate;
 
                 ((BondsGroup)GroupsComboBox.SelectedItem).BondItems.Add(bond);
             }
+            ProgressImage.Visibility = Visibility.Hidden;
+            Grid1.IsEnabled = true;
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
             while (SelectedRecordsDataGrid.SelectedItems.Count > 0)
-                ((DataTable)GroupsComboBox.SelectedItem).Rows.Remove(((DataRowView)SelectedRecordsDataGrid.SelectedItem).Row);
+                ((BondsGroup)GroupsComboBox.SelectedItem).BondItems.Remove(((Bond)SelectedRecordsDataGrid.SelectedItem));
         }
 
         private void RemoveAll_Click(object sender, RoutedEventArgs e)
         {
-            ((DataTable)GroupsComboBox.SelectedItem).Rows.Clear();
+            ((BondsGroup)GroupsComboBox.SelectedItem).BondItems.Clear();
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
@@ -261,11 +267,9 @@ namespace BondsMapWPF
 
         private void BuildBondsMapButton_Click(object sender, RoutedEventArgs e)
         {
-            var selectedRecordsTables = GroupsComboBox.Items.Cast<DataTable>().ToArray();
-            foreach (var selectedRecordsTable in selectedRecordsTables)
-                selectedRecordsTable.AcceptChanges();
-            
-            if (selectedRecordsTables.SelectMany(s => s.AsEnumerable()).All(w => w.RowState == DataRowState.Deleted || w.IsNull("Duration") || w.IsNull("YieldClose"))) return;
+            var selectedRecordsTables = GroupsComboBox.Items.Cast<BondsGroup>().ToArray();
+            if (selectedRecordsTables.SelectMany(s => s.BondItems)
+                .All(w => !w.Duration.HasValue || !w.YieldClose.HasValue)) return;
             new ChartWindow(selectedRecordsTables).Show();
         }
 
@@ -307,8 +311,8 @@ namespace BondsMapWPF
                         " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(
                             this);
 
-            var table = ((DataView) SelectedRecordsDataGrid.ItemsSource).Table;
-            table.Rows.Add(table.NewRow());
+            if (GroupsComboBox.SelectedItem != null)
+                ((BondsGroup) GroupsComboBox.SelectedItem).BondItems.Add(new Bond());
         }
 
         private void ImportFromExcelButton_Click(object sender, RoutedEventArgs e)
@@ -345,9 +349,9 @@ namespace BondsMapWPF
                 .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
         }
 
-        private void CalendarReports_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
+        private void CalendarReports_GotMouseCapture(object sender, MouseEventArgs e)
         {
-            if (Mouse.Captured is Calendar || Mouse.Captured is System.Windows.Controls.Primitives.CalendarItem)
+            if (Mouse.Captured is Calendar || Mouse.Captured is CalendarItem)
                 Mouse.Capture(null);
         }
 

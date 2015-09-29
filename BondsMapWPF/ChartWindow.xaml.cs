@@ -15,17 +15,17 @@ namespace BondsMapWPF
     /// </summary>
     public partial class ChartWindow
     {
-        public ChartWindow(DataTable[] selectedRecordsTables)
+        public ChartWindow(BondsGroup[] selectedRecordsTables)
         {
             InitializeComponent();
 
-            var notNullRecords = selectedRecordsTables.AsEnumerable().SelectMany(s=>s.AsEnumerable())
-                .Where(w => w.RowState != DataRowState.Deleted && !w.IsNull("Duration") && !w.IsNull("YieldClose")).ToArray();
+            var notNullRecords = selectedRecordsTables.AsEnumerable().SelectMany(s=>s.BondItems)
+                .Where(w => w.Duration.HasValue && w.YieldClose.HasValue).ToArray();
 
-            var minDuration = notNullRecords.Min(s => Convert.ToInt32(s["Duration"]));
-            var maxDuration = notNullRecords.Max(s => Convert.ToInt32(s["Duration"]));
-            var minYield = notNullRecords.Min(s => Convert.ToDouble(s["YieldClose"]));
-            var maxYield = notNullRecords.Max(s => Convert.ToDouble(s["YieldClose"]));
+            var minDuration = notNullRecords.Min(s => Convert.ToInt32(s.Duration));
+            var maxDuration = notNullRecords.Max(s => Convert.ToInt32(s.Duration));
+            var minYield = notNullRecords.Min(s => Convert.ToDouble(s.YieldClose));
+            var maxYield = notNullRecords.Max(s => Convert.ToDouble(s.YieldClose));
 
             const double xInterval = 30.0;
             const double yInterval = 1.0;
@@ -77,8 +77,8 @@ namespace BondsMapWPF
                 /*recordsTable.Columns.Add("ChartLabel", typeof (string),
                     string.Format("SecShortName+' [{0}]'", recordsTable.TableName));*/
 
-                var notNullTable = recordsTable.AsEnumerable().
-                    Where(w => w.RowState != DataRowState.Deleted && !w.IsNull("Duration") && !w.IsNull("YieldClose")).ToArray();
+                var notNullTable = recordsTable.BondItems.
+                    Where(w => w.Duration.HasValue && w.YieldClose.HasValue).ToArray();
 
                 if (!notNullTable.Any()) continue;
 
@@ -93,8 +93,8 @@ namespace BondsMapWPF
                 BondsMapChart.Series[recordsTable.TableName].Points.DataBind(notNullTable, "Duration", "YieldClose",
                     "ToolTip=ChartTip,Label=SecShortName,LabelToolTip=SecurityId");
 
-                var trend = new Trend(notNullTable.Select(s => Convert.ToInt32(s["Duration"])).ToList(),
-                    notNullTable.Select(s => Convert.ToDouble(s["YieldClose"])).ToList(), Trend.Type.Logarithmic);
+                var trend = new Trend(notNullTable.Select(s => Convert.ToInt32(s.Duration)).ToList(),
+                    notNullTable.Select(s => Convert.ToDouble(s.YieldClose)).ToList(), Trend.Type.Logarithmic);
 
                 var trendDurations = Enumerable.Range(1, maxXScale+1000).ToArray();
 
