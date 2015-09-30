@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -41,7 +42,7 @@ namespace BondsMapWPF
             set
             {
                 _tradeDate = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("TradeDate"));
+                OnPropertyChanged();
             }
         }
 
@@ -51,7 +52,7 @@ namespace BondsMapWPF
             set
             {
                 _boardName = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("BoardName"));
+                OnPropertyChanged();
             }
         }
 
@@ -61,7 +62,7 @@ namespace BondsMapWPF
             set
             {
                 _securityId = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("SecurityId"));
+                OnPropertyChanged();
             }
         }
 
@@ -71,7 +72,7 @@ namespace BondsMapWPF
             set
             {
                 _secShortName = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("SecShortName"));
+                OnPropertyChanged();
             }
         }
 
@@ -81,7 +82,7 @@ namespace BondsMapWPF
             set
             {
                 _regNumber = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("RegNumber"));
+                OnPropertyChanged();
             }
         }
 
@@ -91,7 +92,7 @@ namespace BondsMapWPF
             set
             {
                 _currencyId = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("CurrencyId"));
+                OnPropertyChanged();
             }
         }
 
@@ -101,7 +102,7 @@ namespace BondsMapWPF
             set
             {
                 _yieldClose = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("YieldClose"));
+                OnPropertyChanged();
             }
         }
 
@@ -111,7 +112,7 @@ namespace BondsMapWPF
             set
             {
                 _duration = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("Duration"));
+                OnPropertyChanged();
             }
         }
 
@@ -121,7 +122,7 @@ namespace BondsMapWPF
             set
             {
                 _durationYears = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("DurationYears"));
+                OnPropertyChanged();
             }
         }
 
@@ -131,15 +132,17 @@ namespace BondsMapWPF
             set
             {
                 _matDate = value;
-                OnPropertyChanged(new PropertyChangedEventArgs("MatDate"));
+                OnPropertyChanged();
             }
         }
 
+
         public event PropertyChangedEventHandler PropertyChanged;
-        public void OnPropertyChanged(PropertyChangedEventArgs e)
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
-            if (PropertyChanged != null)
-                PropertyChanged(this, e);
+            var handler = PropertyChanged;
+            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
