@@ -5,7 +5,6 @@ using System.ComponentModel;
 using System.Data;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -180,50 +179,52 @@ namespace BondsMapWPF
             FoundedRecordsListBox.ItemsSource = securities.Where(w=>w.Group.Contains("bonds")).OrderBy(o=>o.ShortName);
         }
 
-        private void FillDataGrid(IEnumerable<MicexGrabber.SecurityItem> secItems)
+        private async void FillDataGrid(IEnumerable<MicexGrabber.SecurityItem> secItems)
         {
             if (GroupsComboBox.SelectedItem == null)
                 new InputBox(
                     string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
-                        " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
+                        " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(
+                            this);
 
             if (GroupsComboBox.SelectedItem == null) return;
+            var currentDate = CalendarReports.SelectedDate ?? DateTime.Now;
 
             ProgressImage.Visibility = Visibility.Visible;
             Grid1.IsEnabled = false;
-            ThreadPool.QueueUserWorkItem(state =>
+            var task = new Task(() =>
             {
                 Parallel.ForEach(secItems, item =>
                 {
-                    var bond = new Bond();
-                    CalendarReports.Dispatcher.Invoke(new Action(() => { bond.TradeDate = CalendarReports.SelectedDate; }));
-                    bond.SecurityId = item.SecId;
-                    bond.SecShortName = item.ShortName;
-                    bond.RegNumber = item.RegNumber;
-
-
-                    var secBoardGroup = MicexGrabber.GetSecurityBoardGroups(bond.SecurityId).First();
-                    var boardGroupInfo = MicexGrabber.GetBoardGroupInfo(secBoardGroup.Id, bond.SecurityId);
-                    bond.BoardName = boardGroupInfo.BoardItem.Title;
-                    var marketData = MicexGrabber.GetMarketData(bond.TradeDate ?? DateTime.Now, bond.SecurityId,
-                        boardGroupInfo);
+                    var secBoardGroup = MicexGrabber.GetSecurityBoardGroups(item.SecId).First();
+                    var boardGroupInfo = MicexGrabber.GetBoardGroupInfo(secBoardGroup.Id, item.SecId);
+                    var marketData = MicexGrabber.GetMarketData(currentDate, item.SecId, boardGroupInfo);
                     if (marketData.Equals(new MicexGrabber.MarketData())) return;
-                    bond.YieldClose = marketData.YieldClose;
-                    bond.Duration = marketData.Duration;
-                    bond.DurationYears = bond.Duration/365d;
-                    bond.CurrencyId = marketData.CurrencyId;
-                    bond.MatDate = marketData.MatDate;
+
+                    var bond = new Bond
+                    {
+                        TradeDate = currentDate,
+                        SecurityId = item.SecId,
+                        SecShortName = item.ShortName,
+                        RegNumber = item.RegNumber,
+                        BoardName = boardGroupInfo.BoardItem.Title,
+                        YieldClose = marketData.YieldClose,
+                        Duration = marketData.Duration,
+                        DurationYears = marketData.Duration/365d,
+                        CurrencyId = marketData.CurrencyId,
+                        MatDate = marketData.MatDate
+                    };
 
                     GroupsComboBox.Dispatcher.Invoke(
                         new Action(() => { ((BondsGroup) GroupsComboBox.SelectedItem).BondItems.Add(bond); }));
                 });
-                ProgressImage.Dispatcher.Invoke(new Action(() =>
-                {
-                    ProgressImage.Visibility = Visibility.Hidden;
-                    Grid1.IsEnabled = true;
-                }));
-            }, null);
+            });
+            task.Start();
+            await task;
+            ProgressImage.Visibility = Visibility.Hidden;
+            Grid1.IsEnabled = true;
         }
+
         private void AddAll_Click(object sender, RoutedEventArgs e)
         {
             FillDataGrid(FoundedRecordsListBox.Items.Cast<MicexGrabber.SecurityItem>());
