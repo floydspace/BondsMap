@@ -270,9 +270,9 @@ namespace BondsMapWPF
 
         private void GroupsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            SelectedRecordsDataGrid.ItemsSource = e.AddedItems.Count > 0
+            /*SelectedRecordsDataGrid.ItemsSource = e.AddedItems.Count > 0
                 ? e.AddedItems.Cast<BondsGroup>().First().BondItems
-                : new ObservableCollection<Bond>();
+                : new ObservableCollection<Bond>();*/
 
             ((Image)FavoritesButton.Content).Source = !IsInFavorites
                     ? new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute))
@@ -281,7 +281,7 @@ namespace BondsMapWPF
 
         private void DeleteGroupButton_Click(object sender, RoutedEventArgs e)
         {
-            var selectedTable = GroupsComboBox.SelectedItem as DataTable;
+            var selectedTable = GroupsComboBox.SelectedItem as BondsGroup;
             if (selectedTable == null) return;
             var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
             var fileName = Path.Combine(favoritesDirectory, selectedTable.TableName + ".xml");
@@ -356,10 +356,10 @@ namespace BondsMapWPF
 
         private void FavoritesButton_Click(object sender, RoutedEventArgs e)
         {
-            var selectedTable = GroupsComboBox.SelectedItem as DataTable;
+            var selectedTable = GroupsComboBox.SelectedItem as BondsGroup;
             if (selectedTable == null) return;
 
-            var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
+            /*var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
             var fileName = Path.Combine(favoritesDirectory, selectedTable.TableName + ".xml");
             if (File.Exists(fileName))
             {
@@ -373,7 +373,7 @@ namespace BondsMapWPF
                 selectedTable.WriteXml(fileName, XmlWriteMode.WriteSchema);
                 ((Image)FavoritesButton.Content).Source =
                 new BitmapImage(new Uri(@"pack://application:,,,/Images/favorRemove.jpg", UriKind.RelativeOrAbsolute));
-            }
+            }*/
         }
     }
 }
