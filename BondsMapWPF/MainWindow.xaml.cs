@@ -261,9 +261,9 @@ namespace BondsMapWPF
                         SecShortName = marketData.ShortName,
                         RegNumber = marketData.RegNumber,
                         BoardName = marketData.BoardName,
-                        YieldClose = marketData.YieldClose ?? marketData.Yield,
-                        Duration = marketData.Duration==new int() ? new int?() : marketData.Duration,
-                        DurationYears = marketData.Duration == new int() ? new int?() : marketData.Duration / 365d,
+                        YieldClose = marketData.YieldClose ?? marketData.Yield ?? marketData.CloseYield,
+                        Duration = marketData.Duration != new int() ? marketData.Duration : new int?(),
+                        DurationYears = marketData.Duration == new int() ? new int?() : marketData.Duration/365d,
                         CurrencyId = marketData.CurrencyId,
                         BuyBackDate = marketData.BuyBackDate,
                         MatDate = marketData.MatDate

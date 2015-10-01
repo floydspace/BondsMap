@@ -69,13 +69,13 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Width="auto" Header="Дата" Binding="{Binding Path=TradeDate, StringFormat=dd.MM.yyyy}"/>
                     <DataGridTextColumn Width="auto" Header="Режим" Binding="{Binding Path=BoardName}"/>
-                    <DataGridTextColumn Width="*" Header="Код бумаги" Binding="{Binding Path=SecurityId}"/>
-                    <DataGridTextColumn Width="*" Header="Наименование" Binding="{Binding Path=SecShortName}"/>
-                    <DataGridTextColumn Width="*" Header="Рег. номер" Binding="{Binding Path=RegNumber}"/>
+                    <DataGridTextColumn Width="auto" Header="Код бумаги" Binding="{Binding Path=SecurityId}"/>
+                    <DataGridTextColumn Width="auto" Header="Наименование" Binding="{Binding Path=SecShortName}"/>
+                    <DataGridTextColumn Width="auto" Header="Рег. номер" Binding="{Binding Path=RegNumber}"/>
                     <DataGridTextColumn Width="auto" Header="Валюта" Binding="{Binding Path=CurrencyId}"/>
-                    <DataGridTextColumn Width="auto" Header="Доходность" Binding="{Binding Path=YieldClose}"/>
-                    <DataGridTextColumn Width="auto" Header="Дюрация, дней" Binding="{Binding Path=Duration}"/>
-                    <DataGridTextColumn Width="auto" Header="Дюрация, лет" Binding="{Binding Path=DurationYears, StringFormat=N}"/>
+                    <DataGridTextColumn Width="*" Header="Доходность" Binding="{Binding Path=YieldClose}"/>
+                    <DataGridTextColumn Width="*" Header="Дюрация, дней" Binding="{Binding Path=Duration}"/>
+                    <DataGridTextColumn Width="*" Header="Дюрация, лет" Binding="{Binding Path=DurationYears, StringFormat=N}"/>
                     <DataGridTextColumn Width="auto" Header="Дата оферты" Binding="{Binding Path=BuyBackDate, StringFormat=dd.MM.yyyy}"/>
                     <DataGridTextColumn Width="auto" Header="Дата погашения" Binding="{Binding Path=MatDate, StringFormat=dd.MM.yyyy}"/>
                 </DataGrid.Columns>
