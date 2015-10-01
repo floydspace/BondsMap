@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BondsMapWPF", "BondsMapWPF\BondsMapWPF.csproj", "{B7DBFF24-243D-42FA-A4A5-4AEB39ADEE4C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MICEX.Portable", "..\FloydSpace\MICEX.Portable\MICEX.Portable.csproj", "{CA3D0040-05EE-4D37-8727-8BF45CA09328}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Helpers", "..\FloydSpace\Helpers\Helpers.csproj", "{763DEA18-DCE6-49D8-A1CE-A86E768D119B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{CA3D0040-05EE-4D37-8727-8BF45CA09328}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA3D0040-05EE-4D37-8727-8BF45CA09328}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA3D0040-05EE-4D37-8727-8BF45CA09328}.Release|Any CPU.Build.0 = Release|Any CPU
+		{763DEA18-DCE6-49D8-A1CE-A86E768D119B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{763DEA18-DCE6-49D8-A1CE-A86E768D119B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{763DEA18-DCE6-49D8-A1CE-A86E768D119B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{763DEA18-DCE6-49D8-A1CE-A86E768D119B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,22 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:bondsMapWpf="clr-namespace:BondsMapWPF"
         mc:Ignorable="d" x:Class="BondsMapWPF.MainWindow"
-        Title="Карта облигаций" Height="540" Width="960" Icon="Images/Chart.ico">
+        Title="Карта облигаций" Height="540" Width="960" Icon="Images/Chart.ico" Loaded="Window_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
+            <ColumnDefinition Width="185" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-            <Calendar Grid.Row="1" x:Name="CalendarReports" Margin="3,0" GotMouseCapture="CalendarReports_GotMouseCapture">
-                <!--<Calendar.CalendarDayButtonStyle>
+            <DatePicker Grid.Row="0" Name="CalendarReports" Margin="3" SelectedDateChanged="CalendarReports_SelectedDatesChanged" />
+            <!--<Calendar Grid.Row="1" x:Name="CalendarReports" Margin="3,0" GotMouseCapture="CalendarReports_GotMouseCapture" SelectedDatesChanged="CalendarReports_SelectedDatesChanged">
+                <Calendar.CalendarDayButtonStyle>
                     <Style TargetType="CalendarDayButton" BasedOn="{StaticResource {x:Type CalendarDayButton}}">
                         <Style.Triggers>
                             <Trigger Property="IsBlackedOut" Value="False">
@@ -33,10 +34,12 @@
                             </Trigger>
                         </Style.Triggers>
                     </Style>
-                </Calendar.CalendarDayButtonStyle>-->
-            </Calendar>
+                </Calendar.CalendarDayButtonStyle>
+            </Calendar> -->
+            <ComboBox Grid.Row="1" Name="SecGroupsComboBox" DisplayMemberPath="Title" Margin="3,0,3,3" SelectionChanged="SecGroupsComboBox_SelectionChanged"/>
             <TextBox Grid.Row="2" Name="SearchTextBox" Margin="3,0,3,0" TextChanged="SearchTextBox_TextChanged"/>
             <ListBox Grid.Row="3" Name="FoundedRecordsListBox" DisplayMemberPath="ShortName" Margin="3" SelectionMode="Extended"/>
+            <Image Name="ProgressImageListBox" Grid.Row="3" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
             <Grid Grid.Row="4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
@@ -73,6 +76,7 @@
                     <DataGridTextColumn Width="auto" Header="Доходность" Binding="{Binding Path=YieldClose}"/>
                     <DataGridTextColumn Width="auto" Header="Дюрация, дней" Binding="{Binding Path=Duration}"/>
                     <DataGridTextColumn Width="auto" Header="Дюрация, лет" Binding="{Binding Path=DurationYears, StringFormat=N}"/>
+                    <DataGridTextColumn Width="auto" Header="Дата оферты" Binding="{Binding Path=BuyBackDate, StringFormat=dd.MM.yyyy}"/>
                     <DataGridTextColumn Width="auto" Header="Дата погашения" Binding="{Binding Path=MatDate, StringFormat=dd.MM.yyyy}"/>
                 </DataGrid.Columns>
             </DataGrid>

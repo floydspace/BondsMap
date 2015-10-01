@@ -34,6 +34,7 @@ namespace BondsMapWPF
         private double? _yieldClose;
         private int? _duration;
         private double? _durationYears;
+        private DateTime? _buyBackDate;
         private DateTime? _matDate;
 
         public DateTime? TradeDate
@@ -125,7 +126,15 @@ namespace BondsMapWPF
                 OnPropertyChanged();
             }
         }
-
+        public DateTime? BuyBackDate
+        {
+            get { return _buyBackDate; }
+            set
+            {
+                _buyBackDate = value;
+                OnPropertyChanged();
+            }
+        }
         public DateTime? MatDate
         {
             get { return _matDate; }
@@ -152,6 +161,7 @@ namespace BondsMapWPF
     public partial class MainWindow
     {
         private int _i;
+        public List<MarketData> MarketDatas { get; set; }
         public MainWindow()
         {
             InitializeComponent();
@@ -168,6 +178,41 @@ namespace BondsMapWPF
             }*/
         }
 
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            SecGroupsComboBox.ItemsSource = await MicexGrabber.GetSecurityCollectionsAsync((int)SecurityGroup.Bonds);
+            SecGroupsComboBox.SelectedIndex = 0;
+        }
+
+        private void SecGroupsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!CalendarReports.SelectedDate.HasValue || e.AddedItems.Count == 0) return;
+            BindFoundedBonds(e.AddedItems.Cast<MicexItem>().First().Id, CalendarReports.SelectedDate.Value);
+        }
+
+        private void CalendarReports_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SecGroupsComboBox.SelectedIndex < 0 || e.AddedItems.Count == 0) return;
+            BindFoundedBonds(((MicexItem)SecGroupsComboBox.SelectedItem).Id, e.AddedItems.Cast<DateTime>().First());
+        }
+
+        private async void BindFoundedBonds(int bondsCollectionId, DateTime date)
+        {
+            ProgressImageListBox.Visibility = Visibility.Visible;
+            FoundedRecordsListBox.IsEnabled = false;
+
+            MarketDatas = (await MicexGrabber.GetMarketDataAsync(date, bondsCollectionId, 7, "stock", "bonds")).Where(w=>!w.BoardId.StartsWith("SP")).ToList();
+            MarketDatas.AddRange(await MicexGrabber.GetMarketDataAsync(date, bondsCollectionId, 58, "stock", "bonds"));
+
+            var expressions = SearchTextBox.Text.Split(new[] {' ', ',', ';'}, StringSplitOptions.RemoveEmptyEntries);
+            FoundedRecordsListBox.ItemsSource = MarketDatas.Where(w => expressions.All(expression =>
+                new[] { w.SecId ?? "", w.ShortName ?? "", w.RegNumber ?? "" }.Any(
+                    tm => tm.ToLowerInvariant().Contains(expression.ToLowerInvariant())))).OrderBy(o => o.ShortName);
+
+            ProgressImageListBox.Visibility = Visibility.Hidden;
+            FoundedRecordsListBox.IsEnabled = true;
+        }
+
         private void CreateGroup(string s)
         {
             var bondsGroup = new BondsGroup { TableName = s, BondItems = new ObservableCollection<Bond>() };
@@ -175,14 +220,18 @@ namespace BondsMapWPF
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
 
-        private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (SearchTextBox.Text.Length < 3) return;
-            var securities = await MicexGrabber.FindSecuritiesAsync(SearchTextBox.Text);
-            FoundedRecordsListBox.ItemsSource = securities.Where(w=>w.Group.Contains("bonds")).OrderBy(o=>o.ShortName);
+            //if (SearchTextBox.Text.Length < 3) return;
+            //var securities = await MicexGrabber.FindSecuritiesAsync(SearchTextBox.Text);
+            //FoundedRecordsListBox.ItemsSource = securities.Where(w=>w.Group.Contains("bonds")).OrderBy(o=>o.ShortName);
+            var expressions = SearchTextBox.Text.Split(new[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
+            FoundedRecordsListBox.ItemsSource = MarketDatas.Where(w => expressions.All(expression =>
+                new[] { w.SecId ?? "", w.ShortName ?? "", w.RegNumber ?? "" }.Any(
+                    tm => tm.ToLowerInvariant().Contains(expression.ToLowerInvariant())))).OrderBy(o => o.ShortName);
         }
 
-        private async void FillDataGrid(IEnumerable<MicexGrabber.SecurityItem> secItems)
+        private async void FillDataGrid(IEnumerable<MarketData> secItems)
         {
             if (GroupsComboBox.SelectedItem == null)
                 new InputBox(
@@ -199,22 +248,24 @@ namespace BondsMapWPF
             {
                 Parallel.ForEach(secItems, item =>
                 {
-                    var secBoardGroup = MicexGrabber.GetSecurityBoardGroups(item.SecId).First();
-                    var boardGroupInfo = MicexGrabber.GetBoardGroupInfo(secBoardGroup.Id, item.SecId);
-                    var marketData = MicexGrabber.GetMarketData(currentDate, item.SecId, boardGroupInfo);
-                    if (marketData.Equals(new MicexGrabber.MarketData())) return;
+                    //var secBoardGroup = MicexGrabber.GetBoardGroups(item.SecId).First();
+                    //var marketEngine = MicexGrabber.GetMarketEngine(secBoardGroup.Id, item.SecId);
+                    var marketData = MicexGrabber.GetMarketData(currentDate, item.SecId,
+                        item.BoardId, "stock", "bonds");
+                    if (marketData.Equals(new MarketData())) return;
 
                     var bond = new Bond
                     {
-                        TradeDate = currentDate,
-                        SecurityId = item.SecId,
-                        SecShortName = item.ShortName,
-                        RegNumber = item.RegNumber,
-                        BoardName = boardGroupInfo.BoardItem.Title,
-                        YieldClose = marketData.YieldClose,
-                        Duration = marketData.Duration,
-                        DurationYears = marketData.Duration/365d,
+                        TradeDate = marketData.SysTime ?? marketData.TradeDate,
+                        SecurityId = marketData.SecId,
+                        SecShortName = marketData.ShortName,
+                        RegNumber = marketData.RegNumber,
+                        BoardName = marketData.BoardName,
+                        YieldClose = marketData.YieldClose ?? marketData.Yield,
+                        Duration = marketData.Duration==new int() ? new int?() : marketData.Duration,
+                        DurationYears = marketData.Duration == new int() ? new int?() : marketData.Duration / 365d,
                         CurrencyId = marketData.CurrencyId,
+                        BuyBackDate = marketData.BuyBackDate,
                         MatDate = marketData.MatDate
                     };
 
@@ -230,11 +281,11 @@ namespace BondsMapWPF
 
         private void AddAll_Click(object sender, RoutedEventArgs e)
         {
-            FillDataGrid(FoundedRecordsListBox.Items.Cast<MicexGrabber.SecurityItem>());
+            FillDataGrid(FoundedRecordsListBox.Items.Cast<MarketData>());
         }
         private void Add_Click(object sender, RoutedEventArgs e)
         {
-            FillDataGrid(FoundedRecordsListBox.SelectedItems.Cast<MicexGrabber.SecurityItem>());
+            FillDataGrid(FoundedRecordsListBox.SelectedItems.Cast<MarketData>());
         }
 
         private void Remove_Click(object sender, RoutedEventArgs e)
