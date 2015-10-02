@@ -19,7 +19,7 @@ namespace BondsMapWPF
 {
     public class BondsGroup
     {
-        public string TableName { get; set; }
+        public string Name { get; set; }
         public ObservableCollection<Bond> BondItems { get; set; }
     }
 
@@ -145,6 +145,8 @@ namespace BondsMapWPF
             }
         }
 
+        public string BoardId { get; set; }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -215,7 +217,7 @@ namespace BondsMapWPF
 
         private void CreateGroup(string s)
         {
-            var bondsGroup = new BondsGroup { TableName = s, BondItems = new ObservableCollection<Bond>() };
+            var bondsGroup = new BondsGroup { Name = s, BondItems = new ObservableCollection<Bond>() };
             GroupsComboBox.Items.Add(bondsGroup);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
@@ -261,6 +263,7 @@ namespace BondsMapWPF
                         SecShortName = marketData.ShortName,
                         RegNumber = marketData.RegNumber,
                         BoardName = marketData.BoardName,
+                        BoardId = marketData.BoardId,
                         YieldClose = marketData.YieldClose ?? marketData.Yield ?? marketData.CloseYield,
                         Duration = marketData.Duration != new int() ? marketData.Duration : new int?(),
                         DurationYears = marketData.Duration == new int() ? new int?() : marketData.Duration/365d,
@@ -335,7 +338,7 @@ namespace BondsMapWPF
             var selectedTable = GroupsComboBox.SelectedItem as BondsGroup;
             if (selectedTable == null) return;
             var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
-            var fileName = Path.Combine(favoritesDirectory, selectedTable.TableName + ".xml");
+            var fileName = Path.Combine(favoritesDirectory, selectedTable.Name + ".xml");
             if (File.Exists(fileName)) File.Delete(fileName);
 
             GroupsComboBox.Items.Remove(GroupsComboBox.SelectedItem);
@@ -379,13 +382,9 @@ namespace BondsMapWPF
                 .Distinct().ToArray();
 
             if (GroupsComboBox.SelectedItem == null) return;
-            ((DataTable)GroupsComboBox.SelectedItem).AcceptChanges();
-            FoundedRecordsListBox.Items.Cast<DataRowView>().Select(s => s.Row)
-                .Where(w => isins.Contains(w["SecurityId"]) || isins.Contains(w["RegNumber"]))
-                .Where(w => !((DataTable)GroupsComboBox.SelectedItem).Rows.Cast<DataRow>()
-                    .Any(row => (string)row["BoardName"] == (string)w["BoardName"] &&
-                                (string)row["SecurityId"] == (string)w["SecurityId"]))
-                .CopyToDataTable((DataTable)GroupsComboBox.SelectedItem, LoadOption.OverwriteChanges);
+
+            FillDataGrid(MarketDatas.Where(w => isins.Contains(w.SecId) || isins.Contains(w.RegNumber) || isins.Contains(w.Isin))
+                .Where(w => !((BondsGroup)GroupsComboBox.SelectedItem).BondItems.Any(row => row.BoardId == w.BoardId && row.SecurityId == w.SecId)).ToList());
         }
 
         private void CalendarReports_GotMouseCapture(object sender, MouseEventArgs e)
@@ -411,7 +410,7 @@ namespace BondsMapWPF
             if (selectedTable == null) return;
 
             /*var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
-            var fileName = Path.Combine(favoritesDirectory, selectedTable.TableName + ".xml");
+            var fileName = Path.Combine(favoritesDirectory, selectedTable.Name + ".xml");
             if (File.Exists(fileName))
             {
                 File.Delete(fileName);

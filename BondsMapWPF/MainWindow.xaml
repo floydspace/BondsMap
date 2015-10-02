@@ -11,7 +11,7 @@
             <ColumnDefinition Width="185" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-        <Grid>
+        <Grid Margin="3">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto" />
@@ -19,28 +19,12 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-            <DatePicker Grid.Row="0" Name="CalendarReports" Margin="3" SelectedDateChanged="CalendarReports_SelectedDatesChanged" />
-            <!--<Calendar Grid.Row="1" x:Name="CalendarReports" Margin="3,0" GotMouseCapture="CalendarReports_GotMouseCapture" SelectedDatesChanged="CalendarReports_SelectedDatesChanged">
-                <Calendar.CalendarDayButtonStyle>
-                    <Style TargetType="CalendarDayButton" BasedOn="{StaticResource {x:Type CalendarDayButton}}">
-                        <Style.Triggers>
-                            <Trigger Property="IsBlackedOut" Value="False">
-                                <Setter Property="Background" Value="LightBlue"/>
-                                <Setter Property="FontWeight" Value="Bold"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="DeepSkyBlue"/>
-                                <Setter Property="FontWeight" Value="Bold"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Calendar.CalendarDayButtonStyle>
-            </Calendar> -->
-            <ComboBox Grid.Row="1" Name="SecGroupsComboBox" DisplayMemberPath="Title" Margin="3,0,3,3" SelectionChanged="SecGroupsComboBox_SelectionChanged"/>
-            <TextBox Grid.Row="2" Name="SearchTextBox" Margin="3,0,3,0" TextChanged="SearchTextBox_TextChanged"/>
-            <ListBox Grid.Row="3" Name="FoundedRecordsListBox" DisplayMemberPath="ShortName" Margin="3" SelectionMode="Extended"/>
-            <Image Name="ProgressImageListBox" Grid.Row="3" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
-            <Grid Grid.Row="4">
+            <DatePicker Grid.Row="0" Name="CalendarReports" SelectedDateChanged="CalendarReports_SelectedDatesChanged" />
+            <ComboBox Grid.Row="1" Name="SecGroupsComboBox" DisplayMemberPath="Title" Margin="0,3,0,0" SelectionChanged="SecGroupsComboBox_SelectionChanged"/>
+            <TextBox Grid.Row="2" Name="SearchTextBox" Margin="0,3,0,0" TextChanged="SearchTextBox_TextChanged"/>
+            <ListBox Grid.Row="3" Name="FoundedRecordsListBox" DisplayMemberPath="ShortName" Margin="0,3,0,0" SelectionMode="Extended"/>
+            <Image Grid.Row="3" Name="ProgressImageListBox" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
+            <Grid Grid.Row="4" Margin="0,3,0,0" >
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
@@ -49,10 +33,10 @@
                     <RowDefinition/>
                     <RowDefinition/>
                 </Grid.RowDefinitions>
-                <Button Grid.Column="0" Grid.Row="0" Name="Add" Content="Добавить" Margin="3,0,3,3" Click="Add_Click"/>
-                <Button Grid.Column="1" Grid.Row="0" Name="AddAll" Content="Добавить Все" Margin="0,0,3,3" Click="AddAll_Click"/>
-                <Button Grid.Column="0" Grid.Row="1" Name="Remove" Content="Удалить" Margin="3,0,3,3" Click="Remove_Click"/>
-                <Button Grid.Column="1" Grid.Row="1" Name="RemoveAll" Content="Удалить Все" Margin="0,0,3,3" Click="RemoveAll_Click"/>
+                <Button Grid.Column="0" Grid.Row="0" Name="Add" Content="Добавить" Margin="0,0,3,3" Click="Add_Click"/>
+                <Button Grid.Column="1" Grid.Row="0" Name="AddAll" Content="Добавить Все" Margin="0,0,0,3" Click="AddAll_Click"/>
+                <Button Grid.Column="0" Grid.Row="1" Name="Remove" Content="Удалить" Margin="0,0,3,0" Click="Remove_Click"/>
+                <Button Grid.Column="1" Grid.Row="1" Name="RemoveAll" Content="Удалить Все" Click="RemoveAll_Click"/>
             </Grid>
         </Grid>
         <Grid Name="Grid1" Grid.Column="1">
@@ -60,29 +44,8 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
-            <DataGrid Grid.Row="1" ItemsSource="{Binding ElementName=GroupsComboBox, Path=SelectedItem.(bondsMapWpf:BondsGroup.BondItems)}" Name="SelectedRecordsDataGrid" Margin="0,3,3,3" SelectionMode="Extended" CanUserResizeRows="False" HeadersVisibility="Column" GridLinesVisibility="None" AutoGenerateColumns="False" CanUserAddRows="False">
-                <DataGrid.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Header="Удалить" Click="MenuItem_Click" InputGestureText="Del" />
-                    </ContextMenu>
-                </DataGrid.ContextMenu>
-                <DataGrid.Columns>
-                    <DataGridTextColumn Width="auto" Header="Дата" Binding="{Binding Path=TradeDate, StringFormat=dd.MM.yyyy}"/>
-                    <DataGridTextColumn Width="auto" Header="Режим" Binding="{Binding Path=BoardName}"/>
-                    <DataGridTextColumn Width="auto" Header="Код бумаги" Binding="{Binding Path=SecurityId}"/>
-                    <DataGridTextColumn Width="auto" Header="Наименование" Binding="{Binding Path=SecShortName}"/>
-                    <DataGridTextColumn Width="auto" Header="Рег. номер" Binding="{Binding Path=RegNumber}"/>
-                    <DataGridTextColumn Width="auto" Header="Валюта" Binding="{Binding Path=CurrencyId}"/>
-                    <DataGridTextColumn Width="*" Header="Доходность" Binding="{Binding Path=YieldClose}"/>
-                    <DataGridTextColumn Width="*" Header="Дюрация, дней" Binding="{Binding Path=Duration}"/>
-                    <DataGridTextColumn Width="*" Header="Дюрация, лет" Binding="{Binding Path=DurationYears, StringFormat=N}"/>
-                    <DataGridTextColumn Width="auto" Header="Дата оферты" Binding="{Binding Path=BuyBackDate, StringFormat=dd.MM.yyyy}"/>
-                    <DataGridTextColumn Width="auto" Header="Дата погашения" Binding="{Binding Path=MatDate, StringFormat=dd.MM.yyyy}"/>
-                </DataGrid.Columns>
-            </DataGrid>
-            <Image Name="ProgressImage" Grid.Row="1" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
             <DockPanel Grid.Row="0" Margin="0,3,3,0">
-                <ComboBox Width="150" Name="GroupsComboBox" DisplayMemberPath="TableName" SelectionChanged="GroupsComboBox_SelectionChanged" />
+                <ComboBox Width="150" Name="GroupsComboBox" DisplayMemberPath="Name" SelectionChanged="GroupsComboBox_SelectionChanged" />
                 <Button Name="CreateGroupButton" Click="CreateGroupButton_Click" ToolTip="Создать группу">
                     <Button.Content>
                         <Image Source="Images/add.png" Stretch="None"/>
@@ -114,6 +77,27 @@
                     <Button Name="BuildBondsMapButton" Content="Построить" Width="80" Click="BuildBondsMapButton_Click"/>
                 </WrapPanel>
             </DockPanel>
+            <DataGrid Grid.Row="1" ItemsSource="{Binding ElementName=GroupsComboBox, Path=SelectedItem.(bondsMapWpf:BondsGroup.BondItems)}" Name="SelectedRecordsDataGrid" Margin="0,3,3,3" SelectionMode="Extended" CanUserResizeRows="False" HeadersVisibility="Column" GridLinesVisibility="None" AutoGenerateColumns="False" CanUserAddRows="False">
+                <DataGrid.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="Удалить" Click="MenuItem_Click" InputGestureText="Del" />
+                    </ContextMenu>
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Width="auto" Header="Дата" Binding="{Binding Path=TradeDate, StringFormat=dd.MM.yyyy}"/>
+                    <DataGridTextColumn Width="auto" Header="Режим" Binding="{Binding Path=BoardName}"/>
+                    <DataGridTextColumn Width="auto" Header="Код бумаги" Binding="{Binding Path=SecurityId}"/>
+                    <DataGridTextColumn Width="auto" Header="Наименование" Binding="{Binding Path=SecShortName}"/>
+                    <DataGridTextColumn Width="auto" Header="Рег. номер" Binding="{Binding Path=RegNumber}"/>
+                    <DataGridTextColumn Width="auto" Header="Валюта" Binding="{Binding Path=CurrencyId}"/>
+                    <DataGridTextColumn Width="*" Header="Доходность" Binding="{Binding Path=YieldClose}"/>
+                    <DataGridTextColumn Width="*" Header="Дюрация, дней" Binding="{Binding Path=Duration}"/>
+                    <DataGridTextColumn Width="*" Header="Дюрация, лет" Binding="{Binding Path=DurationYears, StringFormat=N}"/>
+                    <DataGridTextColumn Width="auto" Header="Дата оферты" Binding="{Binding Path=BuyBackDate, StringFormat=dd.MM.yyyy}"/>
+                    <DataGridTextColumn Width="auto" Header="Дата погашения" Binding="{Binding Path=MatDate, StringFormat=dd.MM.yyyy}"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Image Name="ProgressImage" Grid.Row="1" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
         </Grid>
     </Grid>
 </Window>

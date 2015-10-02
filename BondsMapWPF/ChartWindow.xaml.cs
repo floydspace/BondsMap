@@ -75,14 +75,14 @@ namespace BondsMapWPF
             foreach (var recordsTable in selectedRecordsTables)
             {
                 /*recordsTable.Columns.Add("ChartLabel", typeof (string),
-                    string.Format("SecShortName+' [{0}]'", recordsTable.TableName));*/
+                    string.Format("SecShortName+' [{0}]'", recordsTable.Name));*/
 
                 var notNullTable = recordsTable.BondItems.
                     Where(w => w.Duration.HasValue && w.YieldClose.HasValue).ToArray();
 
                 if (!notNullTable.Any()) continue;
 
-                BondsMapChart.Series.Add(new Series(recordsTable.TableName)
+                BondsMapChart.Series.Add(new Series(recordsTable.Name)
                 {
                     ChartArea = "BondsMap",
                     ChartType = SeriesChartType.Point,
@@ -90,7 +90,7 @@ namespace BondsMapWPF
                     MarkerSize = 7,
                     MarkerBorderColor = Color.Black
                 });
-                BondsMapChart.Series[recordsTable.TableName].Points.DataBind(notNullTable, "Duration", "YieldClose",
+                BondsMapChart.Series[recordsTable.Name].Points.DataBind(notNullTable, "Duration", "YieldClose",
                     "ToolTip=ChartTip,Label=SecShortName,LabelToolTip=SecurityId");
 
                 var trend = new Trend(notNullTable.Select(s => Convert.ToInt32(s.Duration)).ToList(),
@@ -99,15 +99,15 @@ namespace BondsMapWPF
                 var trendDurations = Enumerable.Range(1, maxXScale+1000).ToArray();
 
                 BondsMapChart.ApplyPaletteColors();
-                BondsMapChart.Series.Add(new Series(recordsTable.TableName + " (Тренд)")
+                BondsMapChart.Series.Add(new Series(recordsTable.Name + " (Тренд)")
                 {
                     Palette = ChartColorPalette.None,
                     ChartArea = "BondsMap",
                     ChartType = SeriesChartType.Line,
-                    Color = BondsMapChart.Series[recordsTable.TableName].Color,
+                    Color = BondsMapChart.Series[recordsTable.Name].Color,
                     MarkerStyle = MarkerStyle.None
                 });
-                BondsMapChart.Series[recordsTable.TableName + " (Тренд)"].Points.DataBindXY(trendDurations,
+                BondsMapChart.Series[recordsTable.Name + " (Тренд)"].Points.DataBindXY(trendDurations,
                     trendDurations.Select(s => trend.Y(s)).ToArray());
             }
 
