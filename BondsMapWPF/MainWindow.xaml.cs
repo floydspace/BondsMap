@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Xml;
+using System.Xml.Serialization;
 using FloydSpace.MICEX.Portable;
 using Microsoft.Win32;
 
@@ -23,7 +22,7 @@ namespace BondsMapWPF
         public ObservableCollection<Bond> BondItems { get; set; }
     }
 
-    public class Bond : INotifyPropertyChanged 
+    public class Bond : INotifyPropertyChanged
     {
         private DateTime? _tradeDate;
         private string _boardName;
@@ -113,6 +112,7 @@ namespace BondsMapWPF
             set
             {
                 _duration = value;
+                DurationYears = value/365d;
                 OnPropertyChanged();
             }
         }
@@ -126,6 +126,7 @@ namespace BondsMapWPF
                 OnPropertyChanged();
             }
         }
+
         public DateTime? BuyBackDate
         {
             get { return _buyBackDate; }
@@ -135,6 +136,7 @@ namespace BondsMapWPF
                 OnPropertyChanged();
             }
         }
+
         public DateTime? MatDate
         {
             get { return _matDate; }
@@ -146,6 +148,14 @@ namespace BondsMapWPF
         }
 
         public string BoardId { get; set; }
+
+        public string ChartTip {
+            get
+            {
+                return string.Format("Доходность: {0:N2} | Дюрация: {1:N0}", YieldClose.GetValueOrDefault(),
+                    Duration.GetValueOrDefault());
+            }
+        }
 
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -164,25 +174,24 @@ namespace BondsMapWPF
     {
         private int _i;
         public List<MarketData> MarketDatas { get; set; }
+
         public MainWindow()
         {
             InitializeComponent();
 
             CalendarReports.SelectedDate = DateTime.Today;
-            /*var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
+            var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
             if (!Directory.Exists(favoritesDirectory)) return;
             foreach (var favoritesFile in Directory.GetFiles(favoritesDirectory))
-            {
-                var groupTable = new DataTable();
-                groupTable.ReadXml(favoritesFile);
-                GroupsComboBox.Items.Add(groupTable);
-                GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
-            }*/
+                using (var reader = XmlReader.Create(favoritesFile))
+                    GroupsComboBox.Items.Add(new XmlSerializer(typeof (BondsGroup)).Deserialize(reader));
+
+            GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            SecGroupsComboBox.ItemsSource = await MicexGrabber.GetSecurityCollectionsAsync((int)SecurityGroup.Bonds);
+            SecGroupsComboBox.ItemsSource = await MicexGrabber.GetSecurityCollectionsAsync((int) SecurityGroup.Bonds);
             SecGroupsComboBox.SelectedIndex = 0;
         }
 
@@ -195,7 +204,7 @@ namespace BondsMapWPF
         private void CalendarReports_SelectedDatesChanged(object sender, SelectionChangedEventArgs e)
         {
             if (SecGroupsComboBox.SelectedIndex < 0 || e.AddedItems.Count == 0) return;
-            BindFoundedBonds(((MicexItem)SecGroupsComboBox.SelectedItem).Id, e.AddedItems.Cast<DateTime>().First());
+            BindFoundedBonds(((MicexItem) SecGroupsComboBox.SelectedItem).Id, e.AddedItems.Cast<DateTime>().First());
         }
 
         private async void BindFoundedBonds(int bondsCollectionId, DateTime date)
@@ -203,46 +212,46 @@ namespace BondsMapWPF
             ProgressImageListBox.Visibility = Visibility.Visible;
             FoundedRecordsListBox.IsEnabled = false;
 
-            MarketDatas = (await MicexGrabber.GetMarketDataAsync(date, bondsCollectionId, 7, "stock", "bonds")).Where(w=>!w.BoardId.StartsWith("SP")).ToList();
+            MarketDatas =
+                (await MicexGrabber.GetMarketDataAsync(date, bondsCollectionId, 7, "stock", "bonds")).Where(
+                    w => !w.BoardId.StartsWith("SP")).ToList();
             MarketDatas.AddRange(await MicexGrabber.GetMarketDataAsync(date, bondsCollectionId, 58, "stock", "bonds"));
 
-            var expressions = SearchTextBox.Text.Split(new[] {' ', ',', ';'}, StringSplitOptions.RemoveEmptyEntries);
-            FoundedRecordsListBox.ItemsSource = MarketDatas.Where(w => expressions.All(expression =>
-                new[] { w.SecId ?? "", w.ShortName ?? "", w.RegNumber ?? "" }.Any(
-                    tm => tm.ToLowerInvariant().Contains(expression.ToLowerInvariant())))).OrderBy(o => o.ShortName);
+            FilterFoundedBonds(SearchTextBox.Text.Split(new[] {' ', ',', ';'}, StringSplitOptions.RemoveEmptyEntries));
 
             ProgressImageListBox.Visibility = Visibility.Hidden;
             FoundedRecordsListBox.IsEnabled = true;
         }
 
+        private void FilterFoundedBonds(params string[] expressions)
+        {
+            FoundedRecordsListBox.ItemsSource = MarketDatas.Where(w => expressions.All(expression =>
+                new[] {w.SecId ?? "", w.ShortName ?? ""}.Any(
+                    tm => tm.ToLowerInvariant().Contains(expression.ToLowerInvariant())))).OrderBy(o => o.ShortName);
+        }
+
         private void CreateGroup(string s)
         {
-            var bondsGroup = new BondsGroup { Name = s, BondItems = new ObservableCollection<Bond>() };
+            var bondsGroup = new BondsGroup {Name = s, BondItems = new ObservableCollection<Bond>()};
             GroupsComboBox.Items.Add(bondsGroup);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            //if (SearchTextBox.Text.Length < 3) return;
-            //var securities = await MicexGrabber.FindSecuritiesAsync(SearchTextBox.Text);
-            //FoundedRecordsListBox.ItemsSource = securities.Where(w=>w.Group.Contains("bonds")).OrderBy(o=>o.ShortName);
-            var expressions = SearchTextBox.Text.Split(new[] { ' ', ',', ';' }, StringSplitOptions.RemoveEmptyEntries);
-            FoundedRecordsListBox.ItemsSource = MarketDatas.Where(w => expressions.All(expression =>
-                new[] { w.SecId ?? "", w.ShortName ?? "", w.RegNumber ?? "" }.Any(
-                    tm => tm.ToLowerInvariant().Contains(expression.ToLowerInvariant())))).OrderBy(o => o.ShortName);
+            FilterFoundedBonds(SearchTextBox.Text.Split(new[] {' ', ',', ';'}, StringSplitOptions.RemoveEmptyEntries));
         }
 
         private async void FillDataGrid(IEnumerable<MarketData> secItems)
         {
             if (GroupsComboBox.SelectedItem == null)
                 new InputBox(
-                    string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
+                    string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "" : SearchTextBox.Text + " - ",
+                        ((MicexItem) SecGroupsComboBox.SelectedItem).Title,
                         " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(
                             this);
 
             if (GroupsComboBox.SelectedItem == null) return;
-            var currentDate = CalendarReports.SelectedDate ?? DateTime.Now;
 
             ProgressImage.Visibility = Visibility.Visible;
             Grid1.IsEnabled = false;
@@ -250,8 +259,8 @@ namespace BondsMapWPF
             {
                 Parallel.ForEach(secItems, item =>
                 {
-                    //var secBoardGroup = MicexGrabber.GetBoardGroups(item.SecId).First();
-                    //var marketEngine = MicexGrabber.GetMarketEngine(secBoardGroup.Id, item.SecId);
+                    var currentDate = item.TradeDate ?? item.SysTime ?? DateTime.Today;
+
                     var marketData = MicexGrabber.GetMarketData(currentDate, item.SecId,
                         item.BoardId, "stock", "bonds");
                     if (marketData.Equals(new MarketData())) return;
@@ -264,9 +273,8 @@ namespace BondsMapWPF
                         RegNumber = marketData.RegNumber,
                         BoardName = marketData.BoardName,
                         BoardId = marketData.BoardId,
-                        YieldClose = marketData.YieldClose ?? marketData.Yield ?? marketData.CloseYield,
+                        YieldClose = marketData.YieldClose ?? (marketData.Yield != new int() ? marketData.Yield : new int?()) ?? (marketData.CloseYield != new int() ? marketData.CloseYield : new int?()),
                         Duration = marketData.Duration != new int() ? marketData.Duration : new int?(),
-                        DurationYears = marketData.Duration == new int() ? new int?() : marketData.Duration/365d,
                         CurrencyId = marketData.CurrencyId,
                         BuyBackDate = marketData.BuyBackDate,
                         MatDate = marketData.MatDate
@@ -286,6 +294,7 @@ namespace BondsMapWPF
         {
             FillDataGrid(FoundedRecordsListBox.Items.Cast<MarketData>());
         }
+
         private void Add_Click(object sender, RoutedEventArgs e)
         {
             FillDataGrid(FoundedRecordsListBox.SelectedItems.Cast<MarketData>());
@@ -294,12 +303,13 @@ namespace BondsMapWPF
         private void Remove_Click(object sender, RoutedEventArgs e)
         {
             while (SelectedRecordsDataGrid.SelectedItems.Count > 0)
-                ((BondsGroup)GroupsComboBox.SelectedItem).BondItems.Remove(((Bond)SelectedRecordsDataGrid.SelectedItem));
+                ((BondsGroup) GroupsComboBox.SelectedItem).BondItems.Remove(
+                    ((Bond) SelectedRecordsDataGrid.SelectedItem));
         }
 
         private void RemoveAll_Click(object sender, RoutedEventArgs e)
         {
-            ((BondsGroup)GroupsComboBox.SelectedItem).BondItems.Clear();
+            ((BondsGroup) GroupsComboBox.SelectedItem).BondItems.Clear();
         }
 
         private void MenuItem_Click(object sender, RoutedEventArgs e)
@@ -318,19 +328,16 @@ namespace BondsMapWPF
         private void CreateGroupButton_Click(object sender, RoutedEventArgs e)
         {
             new InputBox(
-                string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
+                string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "" : SearchTextBox.Text + " - ",
+                    ((MicexItem) SecGroupsComboBox.SelectedItem).Title,
                     " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
         }
 
         private void GroupsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            /*SelectedRecordsDataGrid.ItemsSource = e.AddedItems.Count > 0
-                ? e.AddedItems.Cast<BondsGroup>().First().BondItems
-                : new ObservableCollection<Bond>();*/
-
-            ((Image)FavoritesButton.Content).Source = !IsInFavorites
-                    ? new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute))
-                    : new BitmapImage(new Uri(@"pack://application:,,,/Images/favorRemove.jpg", UriKind.RelativeOrAbsolute));
+            ((Image) FavoritesButton.Content).Source = !IsInFavorites
+                ? new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute))
+                : new BitmapImage(new Uri(@"pack://application:,,,/Images/favorRemove.jpg", UriKind.RelativeOrAbsolute));
         }
 
         private void DeleteGroupButton_Click(object sender, RoutedEventArgs e)
@@ -349,7 +356,7 @@ namespace BondsMapWPF
         {
             if (GroupsComboBox.SelectedItem == null)
                 new InputBox(
-                    string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
+                    string.Concat("Группа " + ++_i,
                         " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(
                             this);
 
@@ -361,9 +368,8 @@ namespace BondsMapWPF
         {
             if (GroupsComboBox.SelectedItem == null)
                 new InputBox(
-                    string.Concat(string.IsNullOrWhiteSpace(SearchTextBox.Text) ? "Группа " + ++_i : SearchTextBox.Text,
-                        " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(
-                            this);
+                    string.Concat("Импорт - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")),
+                    CreateGroup).ShowDialog(this);
 
             var ofd = new OpenFileDialog
             {
@@ -383,23 +389,22 @@ namespace BondsMapWPF
 
             if (GroupsComboBox.SelectedItem == null) return;
 
-            FillDataGrid(MarketDatas.Where(w => isins.Contains(w.SecId) || isins.Contains(w.RegNumber) || isins.Contains(w.Isin))
-                .Where(w => !((BondsGroup)GroupsComboBox.SelectedItem).BondItems.Any(row => row.BoardId == w.BoardId && row.SecurityId == w.SecId)).ToList());
+            FillDataGrid(
+                MarketDatas.Where(w => isins.Contains(w.SecId) || isins.Contains(w.RegNumber) || isins.Contains(w.Isin))
+                    .Where(
+                        w =>
+                            !((BondsGroup) GroupsComboBox.SelectedItem).BondItems.Any(
+                                row => row.BoardId == w.BoardId && row.SecurityId == w.SecId)).ToList());
         }
 
-        private void CalendarReports_GotMouseCapture(object sender, MouseEventArgs e)
+        public bool IsInFavorites
         {
-            if (Mouse.Captured is Calendar || Mouse.Captured is CalendarItem)
-                Mouse.Capture(null);
-        }
-
-        public bool IsInFavorites {
             get
             {
-                var selectedTable = GroupsComboBox.SelectedItem as DataTable;
+                var selectedTable = GroupsComboBox.SelectedItem as BondsGroup;
                 if (selectedTable == null) return false;
 
-                var fileName = Path.Combine(Environment.CurrentDirectory, "Favorites", selectedTable.TableName + ".xml");
+                var fileName = Path.Combine(Environment.CurrentDirectory, "Favorites", selectedTable.Name + ".xml");
                 return File.Exists(fileName);
             }
         }
@@ -409,21 +414,24 @@ namespace BondsMapWPF
             var selectedTable = GroupsComboBox.SelectedItem as BondsGroup;
             if (selectedTable == null) return;
 
-            /*var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
+            var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
             var fileName = Path.Combine(favoritesDirectory, selectedTable.Name + ".xml");
             if (File.Exists(fileName))
             {
                 File.Delete(fileName);
-                ((Image)FavoritesButton.Content).Source =
-                new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute));
+                ((Image) FavoritesButton.Content).Source =
+                    new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute));
             }
             else
             {
                 Directory.CreateDirectory(favoritesDirectory);
-                selectedTable.WriteXml(fileName, XmlWriteMode.WriteSchema);
-                ((Image)FavoritesButton.Content).Source =
-                new BitmapImage(new Uri(@"pack://application:,,,/Images/favorRemove.jpg", UriKind.RelativeOrAbsolute));
-            }*/
+
+                using (XmlWriter writer = XmlWriter.Create(fileName))
+                    new XmlSerializer(typeof (BondsGroup)).Serialize(writer, GroupsComboBox.SelectedItem);
+
+                ((Image) FavoritesButton.Content).Source =
+                    new BitmapImage(new Uri(@"pack://application:,,,/Images/favorRemove.jpg", UriKind.RelativeOrAbsolute));
+            }
         }
     }
 }
