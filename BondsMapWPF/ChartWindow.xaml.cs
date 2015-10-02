@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.DataVisualization.Charting;
@@ -138,100 +139,111 @@ namespace BondsMapWPF
 
         private void ExportToExcelButton_Click(object sender, RoutedEventArgs e)
         {
-            var excel = new Application {SheetsInNewWorkbook = 1};
-
-            var newbook = excel.Workbooks.Add(XlWBATemplate.xlWBATChart);
-
-            Chart chart = newbook.Charts[1];
-            chart.ChartType = XlChartType.xlXYScatter;
-
-            List<double> allDurations = new List<double>();
-            List<double> allYields = new List<double>();
-
-            BondsMapChart.ApplyPaletteColors();
-            foreach (var bs in BondsMapChart.Series.Where(w => !w.Name.EndsWith(" (Тренд)")))
+            ProgressImage1.Visibility = Visibility.Visible;
+            ExportToExcelButton.IsEnabled = false;
+            ThreadPool.QueueUserWorkItem(state =>
             {
-                Microsoft.Office.Interop.Excel.Series seria;
+                var excel = new Application {SheetsInNewWorkbook = 1};
 
-                foreach (var bond in bs.Points)
+                var newbook = excel.Workbooks.Add(XlWBATemplate.xlWBATChart);
+
+                Chart chart = newbook.Charts[1];
+                chart.ChartType = XlChartType.xlXYScatter;
+
+                List<double> allDurations = new List<double>();
+                List<double> allYields = new List<double>();
+
+                BondsMapChart.ApplyPaletteColors();
+                foreach (var bs in BondsMapChart.Series.Where(w => !w.Name.EndsWith(" (Тренд)")))
                 {
+                    Microsoft.Office.Interop.Excel.Series seria;
+
+                    foreach (var bond in bs.Points)
+                    {
+                        seria = chart.SeriesCollection().NewSeries();
+                        seria.XValues = bond.XValue;
+                        seria.Values = bond.YValues;
+                        seria.Name = bond.Label;
+                        seria.ApplyDataLabels(ShowSeriesName: true);
+
+                        seria.MarkerForegroundColor = (int) XlRgbColor.rgbBlack;
+                        seria.MarkerBackgroundColor = ColorTranslator.ToOle(bond.Color);
+                        seria.MarkerStyle = XlMarkerStyle.xlMarkerStyleCircle;
+                        seria.MarkerSize = 6;
+
+                        seria.DataLabels().ShowSeriesName = true;
+                        seria.DataLabels().ShowValue = false;
+                        seria.DataLabels().ShowCategoryName = false;
+                    }
+
+
                     seria = chart.SeriesCollection().NewSeries();
-                    seria.XValues = bond.XValue;
-                    seria.Values = bond.YValues;
-                    seria.Name = bond.Label;
-                    seria.ApplyDataLabels(ShowSeriesName: true);
+                    seria.XValues = bs.Points.Select(s => s.XValue).ToArray();
+                    seria.Values = bs.Points.Select(s => s.YValues[0]).ToArray();
+                    seria.Name = bs.Name;
+                    Trendline trend = seria.Trendlines().Add(Type: XlTrendlineType.xlLogarithmic);
+                    trend.Format.Line.ForeColor.RGB = ColorTranslator.ToOle(bs.Color);
 
-                    seria.MarkerForegroundColor = (int) XlRgbColor.rgbBlack;
-                    seria.MarkerBackgroundColor = ColorTranslator.ToOle(bond.Color);
-                    seria.MarkerStyle = XlMarkerStyle.xlMarkerStyleCircle;
-                    seria.MarkerSize = 6;
+                    seria.MarkerStyle = XlMarkerStyle.xlMarkerStyleNone;
 
-                    seria.DataLabels().ShowSeriesName = true;
-                    seria.DataLabels().ShowValue = false;
-                    seria.DataLabels().ShowCategoryName = false;
+                    allDurations.AddRange(bs.Points.Select(s => s.XValue));
+                    allYields.AddRange(bs.Points.Select(s => s.YValues[0]));
                 }
 
 
-                seria = chart.SeriesCollection().NewSeries();
-                seria.XValues = bs.Points.Select(s => s.XValue).ToArray();
-                seria.Values = bs.Points.Select(s => s.YValues[0]).ToArray();
-                seria.Name = bs.Name;
-                Trendline trend = seria.Trendlines().Add(Type: XlTrendlineType.xlLogarithmic);
-                trend.Format.Line.ForeColor.RGB = ColorTranslator.ToOle(bs.Color);
+                chart.PlotArea.Interior.ColorIndex = XlColorIndex.xlColorIndexNone;
+                Axis axes = chart.Axes(XlAxisType.xlValue);
+                axes.HasMajorGridlines = true;
+                axes.HasMinorGridlines = true;
+                axes.MajorGridlines.Border.ColorIndex = 16;
+                axes.MajorGridlines.Border.Weight = XlBorderWeight.xlHairline;
+                axes.MajorGridlines.Border.LineStyle = XlLineStyle.xlDash;
+                axes.MinorGridlines.Border.ColorIndex = 48;
+                axes.MinorGridlines.Border.Weight = XlBorderWeight.xlHairline;
+                axes.MinorGridlines.Border.LineStyle = XlLineStyle.xlDot;
+                axes.MinimumScale = (int) (allYields.Min()/0.5)*0.5;
+                axes.MaximumScale = ((int) (allYields.Max()/0.5) + 1)*0.5;
+                axes.MinorUnit = 0.1;
+                axes.MajorUnit = 0.5;
 
-                seria.MarkerStyle = XlMarkerStyle.xlMarkerStyleNone;
+                axes = chart.Axes(XlAxisType.xlCategory);
+                axes.HasMajorGridlines = true;
+                axes.HasMinorGridlines = true;
+                axes.MajorGridlines.Border.ColorIndex = 16;
+                axes.MajorGridlines.Border.Weight = XlBorderWeight.xlHairline;
+                axes.MajorGridlines.Border.LineStyle = XlLineStyle.xlDash;
+                axes.MinorGridlines.Border.ColorIndex = 48;
+                axes.MinorGridlines.Border.Weight = XlBorderWeight.xlHairline;
+                axes.MinorGridlines.Border.LineStyle = XlLineStyle.xlDot;
+                axes.MinimumScale = allDurations.Min()/30*30;
+                axes.MaximumScale = allDurations.Max()/30*30;
+                axes.MinorUnit = 30;
+                axes.MajorUnit = 90;
 
-                allDurations.AddRange(bs.Points.Select(s => s.XValue));
-                allYields.AddRange(bs.Points.Select(s => s.YValues[0]));
-            }
+                chart.Location(XlChartLocation.xlLocationAsNewSheet);
+                chart.HasTitle = true;
+                chart.ChartTitle.Characters.Text = "Карта облигаций"; // + bs.Date.ToString("d");
+                chart.Axes(XlAxisType.xlCategory).HasTitle = true;
+                chart.Axes(XlAxisType.xlCategory).AxisTitle.Characters.Text = "Дюрация, дн.";
+                chart.Axes(XlAxisType.xlValue).HasTitle = true;
+                chart.Axes(XlAxisType.xlValue).AxisTitle.Characters.Text = "Доходность, %";
+                chart.HasLegend = false;
 
+                chart.PageSetup.LeftMargin = excel.InchesToPoints(0.393700787401575);
+                chart.PageSetup.RightMargin = excel.InchesToPoints(0.393700787401575);
+                chart.PageSetup.TopMargin = excel.InchesToPoints(0.393700787401575);
+                chart.PageSetup.BottomMargin = excel.InchesToPoints(0.393700787401575);
+                chart.PageSetup.HeaderMargin = excel.InchesToPoints(0.393700787401575);
+                chart.PageSetup.FooterMargin = excel.InchesToPoints(0.393700787401575);
 
-            chart.PlotArea.Interior.ColorIndex = XlColorIndex.xlColorIndexNone;
-            Axis axes = chart.Axes(XlAxisType.xlValue);
-            axes.HasMajorGridlines = true;
-            axes.HasMinorGridlines = true;
-            axes.MajorGridlines.Border.ColorIndex = 16;
-            axes.MajorGridlines.Border.Weight = XlBorderWeight.xlHairline;
-            axes.MajorGridlines.Border.LineStyle = XlLineStyle.xlDash;
-            axes.MinorGridlines.Border.ColorIndex = 48;
-            axes.MinorGridlines.Border.Weight = XlBorderWeight.xlHairline;
-            axes.MinorGridlines.Border.LineStyle = XlLineStyle.xlDot;
-            axes.MinimumScale = (int) (allYields.Min()/0.5)*0.5;
-            axes.MaximumScale = ((int) (allYields.Max()/0.5) + 1)*0.5;
-            axes.MinorUnit = 0.1;
-            axes.MajorUnit = 0.5;
+                excel.Visible = true;
 
-            axes = chart.Axes(XlAxisType.xlCategory);
-            axes.HasMajorGridlines = true;
-            axes.HasMinorGridlines = true;
-            axes.MajorGridlines.Border.ColorIndex = 16;
-            axes.MajorGridlines.Border.Weight = XlBorderWeight.xlHairline;
-            axes.MajorGridlines.Border.LineStyle = XlLineStyle.xlDash;
-            axes.MinorGridlines.Border.ColorIndex = 48;
-            axes.MinorGridlines.Border.Weight = XlBorderWeight.xlHairline;
-            axes.MinorGridlines.Border.LineStyle = XlLineStyle.xlDot;
-            axes.MinimumScale = allDurations.Min()/30*30;
-            axes.MaximumScale = allDurations.Max()/30*30;
-            axes.MinorUnit = 30;
-            axes.MajorUnit = 90;
-
-            chart.Location(XlChartLocation.xlLocationAsNewSheet);
-            chart.HasTitle = true;
-            chart.ChartTitle.Characters.Text = "Карта облигаций"; // + bs.Date.ToString("d");
-            chart.Axes(XlAxisType.xlCategory).HasTitle = true;
-            chart.Axes(XlAxisType.xlCategory).AxisTitle.Characters.Text = "Дюрация, дн.";
-            chart.Axes(XlAxisType.xlValue).HasTitle = true;
-            chart.Axes(XlAxisType.xlValue).AxisTitle.Characters.Text = "Доходность, %";
-            chart.HasLegend = false;
-
-            chart.PageSetup.LeftMargin = excel.InchesToPoints(0.393700787401575);
-            chart.PageSetup.RightMargin = excel.InchesToPoints(0.393700787401575);
-            chart.PageSetup.TopMargin = excel.InchesToPoints(0.393700787401575);
-            chart.PageSetup.BottomMargin = excel.InchesToPoints(0.393700787401575);
-            chart.PageSetup.HeaderMargin = excel.InchesToPoints(0.393700787401575);
-            chart.PageSetup.FooterMargin = excel.InchesToPoints(0.393700787401575);
-
-            excel.Visible = true;
+                Dispatcher.Invoke(new System.Action(() =>
+                {
+                    ProgressImage1.Visibility = Visibility.Hidden;
+                    ExportToExcelButton.IsEnabled = true;
+                }));
+            });
         }
     }
 }

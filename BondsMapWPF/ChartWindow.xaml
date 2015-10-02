@@ -3,11 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:charting="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         Title="Карта облигаций" Height="540" Width="960" WindowStyle="ToolWindow">
     <DockPanel>
         <ToolBar DockPanel.Dock="Top">
             <Button Content="Печать..." Click="Button_Click"/>
-            <Button Name="ExportToExcelButton" Content="Экспорт в Excel" Click="ExportToExcelButton_Click"/>
+            <Button Name="ExportToExcelButton" Click="ExportToExcelButton_Click">
+                <Button.Content>
+                    <Grid>
+                    <Label Name="Label1" Content="Экспорт в Excel"/>
+                    <Image Name="ProgressImage1" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
+                    </Grid>
+                </Button.Content>
+            </Button>
         </ToolBar>
         <Grid DockPanel.Dock="Bottom">
             <Grid.ColumnDefinitions>
