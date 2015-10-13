@@ -4,12 +4,12 @@ using System.Linq;
 
 namespace BondsMapWPF
 {
-    struct Coordinates
+    struct Point
     {
-        public double X { get; set; }
-        public double Y { get; set; }
+        public double X { get; private set; }
+        public double Y { get; private set; }
 
-        public Coordinates(double x, double y) : this()
+        public Point(double x, double y) : this()
         {
             X = x;
             Y = y;
@@ -18,70 +18,57 @@ namespace BondsMapWPF
 
     class Trend
     {
-        int[] ArrayX;
-        double[] ArrayY;
-        Type TT;
+        private readonly Type _tt;
+        private readonly Point[] _points;
 
         public enum Type
         { Linear, Logarithmic }
 
-        public Trend(int[] arrayX, double[] arrayY, Type tt = Type.Linear)
+        public Trend(Point[] points, Type tt = Type.Linear)
         {
-            ArrayX = arrayX;
-            ArrayY = arrayY;
-            TT = tt;
-        }
-        public Trend(List<int> listX, List<double> listY, Type tt = Type.Linear) :
-            this(listX.ToArray(), listY.ToArray(), tt) { }
-
-        public Trend(Dictionary<int,double> dictXY, Type tt = Type.Linear)
-        {
-            Array.Resize(ref ArrayX, dictXY.Count);
-            Array.Resize(ref ArrayY, dictXY.Count);
-            dictXY.Keys.CopyTo(ArrayX, 0);
-            dictXY.Values.CopyTo(ArrayY, 0);
-            TT = tt;
+            _points = points;
+            _tt = tt;
         }
 
-        double AverageX()
+        private double AverageX
         {
-            return ArrayX.Average(t => TT == Type.Logarithmic ? Math.Log(t) : t);
+            get { return _points.Average(p => _tt == Type.Logarithmic ? Math.Log(p.X) : p.X); }
         }
 
-        double AverageY()
+        private double AverageY
         {
-            return ArrayY.Average();
+            get { return _points.Average(p => p.Y); }
         }
 
-        double FactorM()
+        public double FactorM
         {
-            double avrX = AverageX();
-            double avrY = AverageY();
-
-            double numerator = 0, denominator = 0;
-            for (int i = 0; i < ArrayX.Length; i++)
+            get
             {
-                double curX = TT == Type.Logarithmic ? Math.Log(ArrayX[i]) : ArrayX[i];
-                double curY = ArrayY[i];
-                numerator += (curY - avrY) * (curX - avrX);
-                denominator += (curX - avrX) * (curX - avrX);
+                double numerator = 0, denominator = 0;
+                foreach (var point in _points)
+                {
+                    double curX = _tt == Type.Logarithmic ? Math.Log(point.X) : point.X;
+                    double curY = point.Y;
+                    numerator += (curY - AverageY)*(curX - AverageX);
+                    denominator += (curX - AverageX)*(curX - AverageX);
+                }
+                return numerator/denominator;
             }
-            return numerator / denominator;
         }
 
-        double FactorB()
+        public double FactorB
         {
-            return AverageY() - FactorM() * AverageX();
+            get { return AverageY - FactorM*AverageX; }
         }
 
         public double Y(double x)
         {
-            return FactorM() * (TT == Type.Logarithmic ? Math.Log(x) : x) + FactorB();
+            return FactorM * (_tt == Type.Logarithmic ? Math.Log(x) : x) + FactorB;
         }
 
         public double X(double y)
         {
-            return TT == Type.Logarithmic ? Math.Exp((y - FactorB()) / FactorM()) : (y - FactorB()) / FactorM();
+            return _tt == Type.Logarithmic ? Math.Exp((y - FactorB) / FactorM) : (y - FactorB) / FactorM;
         }
     }
 }

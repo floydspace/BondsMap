@@ -98,8 +98,8 @@ namespace BondsMapWPF
                 BondsMapChart.Series[recordsTable.Name].Points.DataBind(notNullTable, "Duration", "YieldClose",
                     "ToolTip=ChartTip,Label=SecShortName,LabelToolTip=SecurityId");
 
-                var trend = new Trend(notNullTable.Select(s => Convert.ToInt32(s.Duration)).ToList(),
-                    notNullTable.Select(s => Convert.ToDouble(s.YieldClose)).ToList(), Trend.Type.Logarithmic);
+                var trend = new Trend(notNullTable.Select(s => new Point(Convert.ToDouble(s.Duration), Convert.ToDouble(s.YieldClose))).ToArray(),
+                    Trend.Type.Logarithmic);
 
                 var trendDurations = Enumerable.Range(1, maxXScale + 1000).ToArray();
 
