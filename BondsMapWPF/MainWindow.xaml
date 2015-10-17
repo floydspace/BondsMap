@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:bondsMapWpf="clr-namespace:BondsMapWPF"
         mc:Ignorable="d" x:Class="BondsMapWPF.MainWindow"
-        Title="Карта облигаций" Height="540" Width="960" Icon="Images/Chart.ico" Loaded="Window_Loaded">
+        Title="Карта облигаций" Height="540" Width="960" Icon="Images/Chart.png" Loaded="Window_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="185" />
@@ -19,8 +19,8 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-            <DatePicker Grid.Row="0" Name="CalendarReports" SelectedDateChanged="CalendarReports_SelectedDatesChanged" />
-            <ComboBox Grid.Row="1" Name="SecGroupsComboBox" DisplayMemberPath="Title" Margin="0,3,0,0" SelectionChanged="SecGroupsComboBox_SelectionChanged"/>
+            <DatePicker Grid.Row="0" Name="CalendarReports" SelectedDateChanged="CalendarReports_SelectedDatesChanged"  Margin="0,3,0,0" Height="30" VerticalContentAlignment="Center"/>
+            <ComboBox Grid.Row="1" Name="SecGroupsComboBox" DisplayMemberPath="Title" Margin="0,6,0,0" SelectionChanged="SecGroupsComboBox_SelectionChanged"/>
             <TextBox Grid.Row="2" Name="SearchTextBox" Margin="0,3,0,0" TextChanged="SearchTextBox_TextChanged"/>
             <ListBox Grid.Row="3" Name="FoundedRecordsListBox" DisplayMemberPath="ShortName" Margin="0,3,0,0" SelectionMode="Extended"/>
             <Image Grid.Row="3" Name="ProgressImageListBox" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
@@ -45,42 +45,45 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,3,3,0">
-                <ComboBox Width="150" Name="GroupsComboBox" DisplayMemberPath="Name" SelectionChanged="GroupsComboBox_SelectionChanged" />
-                <Button Name="CreateGroupButton" Click="CreateGroupButton_Click" ToolTip="Создать группу">
+                <ComboBox Width="200" Height="30" Name="GroupsComboBox" DisplayMemberPath="Name" SelectionChanged="GroupsComboBox_SelectionChanged" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                <Button Name="CreateGroupButton" Click="CreateGroupButton_Click" ToolTip="Создать группу" Background="{x:Null}" BorderBrush="{x:Null}">
                     <Button.Content>
-                        <Image Source="Images/add.png" Stretch="None"/>
+                        <Image Source="Images/add.png" MaxHeight="32" MaxWidth="32" Stretch="Fill"/>
                     </Button.Content>
                 </Button>
-                <Button Name="DeleteGroupButton" Click="DeleteGroupButton_Click" ToolTip="Удалить группу">
+                <Button Name="DeleteGroupButton" Click="DeleteGroupButton_Click" ToolTip="Удалить группу" Background="{x:Null}" BorderBrush="{x:Null}">
                     <Button.Content>
-                        <Image Source="Images/delete.png" Stretch="None"/>
+                        <Image Source="Images/delete.png" Stretch="Fill" MaxHeight="32" MaxWidth="32"/>
                     </Button.Content>
                 </Button>
-                <Separator Margin="3"/>
-                <Button Name="FavoritesButton" ToolTip="Добавить группу в избранное" Click="FavoritesButton_Click">
+                <Button Name="FavoritesButton" ToolTip="Добавить группу в избранное" Click="FavoritesButton_Click" Background="{x:Null}" BorderBrush="{x:Null}">
                     <Button.Content>
-                        <Image Source="Images/favorAdd.jpg" Stretch="Fill" MaxHeight="16" MaxWidth="16"/>
+                        <Image Source="Images/Pin.png" Stretch="Fill" MaxHeight="32" MaxWidth="32"/>
                     </Button.Content>
                 </Button>
-                <Separator Margin="3"/>
-                <Button Name="AddNewRowButton" ToolTip="Добавить новую строку" Click="AddNewRowButton_Click">
+                <Separator Margin="10"/>
+                <Button Name="AddNewRowButton" ToolTip="Добавить пустую строку" Click="AddNewRowButton_Click" Background="{x:Null}" BorderBrush="{x:Null}">
                     <Button.Content>
-                        <Image Source="Images/newrow.png" Stretch="Fill" MaxHeight="16" MaxWidth="16"/>
+                        <Image Source="Images/newrow.png" Stretch="Fill" MaxHeight="32" MaxWidth="32"/>
                     </Button.Content>
                 </Button>
-                <Button Name="ImportFromExcelButton" ToolTip="Импорт списка бумаг из CSV файла" Click="ImportFromExcelButton_Click">
+                <Button Name="ImportFromExcelButton" ToolTip="Импорт списка бумаг из CSV файла" Click="ImportFromExcelButton_Click" Background="{x:Null}" BorderBrush="{x:Null}">
                     <Button.Content>
-                        <Image Source="Images/importExcel.png" MaxWidth="16" Stretch="Fill" MaxHeight="16"/>
+                        <Image Source="Images/importExcel.png" MaxWidth="32" Stretch="Fill" MaxHeight="32"/>
                     </Button.Content>
                 </Button>
-                <Separator Margin="3"/>
-                <Button Name="AboutButton" ToolTip="О программе" Click="AboutButton_Click">
+                <Separator Margin="10"/>
+                <Button Name="AboutButton" ToolTip="О программе" Click="AboutButton_Click" Background="{x:Null}" BorderBrush="{x:Null}">
                     <Button.Content>
-                        <Image Source="Images/info.png" MaxWidth="16" Stretch="Fill" MaxHeight="16"/>
+                        <Image Source="Images/info.png" MaxWidth="32" Stretch="Fill" MaxHeight="32"/>
                     </Button.Content>
                 </Button>
                 <WrapPanel FlowDirection="RightToLeft">
-                    <Button Name="BuildBondsMapButton" Content="Построить" Width="80" Click="BuildBondsMapButton_Click"/>
+                    <Button Name="BuildBondsMapButton" ToolTip="Построить карту" Click="BuildBondsMapButton_Click"  Background="{x:Null}" BorderBrush="{x:Null}">
+                        <Button.Content>
+                            <Image Source="Images/Chart.png" MaxWidth="32" Stretch="Fill" MaxHeight="32"/>
+                        </Button.Content>
+                    </Button>
                 </WrapPanel>
             </DockPanel>
             <DataGrid Grid.Row="1" ItemsSource="{Binding ElementName=GroupsComboBox, Path=SelectedItem.(bondsMapWpf:BondsGroup.BondItems)}" Name="SelectedRecordsDataGrid" Margin="0,3,3,3" SelectionMode="Extended" CanUserResizeRows="False" HeadersVisibility="Column" GridLinesVisibility="None" AutoGenerateColumns="False" CanUserAddRows="False">

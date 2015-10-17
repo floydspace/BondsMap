@@ -4,19 +4,23 @@
         xmlns:charting="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:gif="http://wpfanimatedgif.codeplex.com"
-        Title="Карта облигаций" Height="540" Width="960" WindowStyle="ToolWindow">
-    <DockPanel>
-        <ToolBar DockPanel.Dock="Top">
-            <Button Content="Печать..." Click="Button_Click"/>
-            <Button Name="ExportToExcelButton" Click="ExportToExcelButton_Click">
+        Title="Карта облигаций" Height="540" Width="960" Icon="Images/Chart.png" ResizeMode="CanResizeWithGrip">
+    <DockPanel Margin="3">
+        <WrapPanel DockPanel.Dock="Top">
+            <Button ToolTip="Печать..." Click="Button_Click" Background="{x:Null}" BorderBrush="{x:Null}">
+                <Button.Content>
+                    <Image Source="Images/Print.png" MaxHeight="32" MaxWidth="32" Stretch="Fill"/>
+                </Button.Content>
+            </Button>
+            <Button ToolTip="Экспорт в Excel" Name="ExportToExcelButton" Click="ExportToExcelButton_Click" Background="{x:Null}" BorderBrush="{x:Null}">
                 <Button.Content>
                     <Grid>
-                    <Label Name="Label1" Content="Экспорт в Excel"/>
-                    <Image Name="ProgressImage1" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
+                        <Image Name="ExportToExcelImage" Source="Images/XLS.png" MaxHeight="32" MaxWidth="32" Stretch="Fill"/>
+                        <Image Name="ProgressImage1" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
                     </Grid>
                 </Button.Content>
             </Button>
-        </ToolBar>
+        </WrapPanel>
         <Grid DockPanel.Dock="Bottom">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>

@@ -140,6 +140,7 @@ namespace BondsMapWPF
         private void ExportToExcelButton_Click(object sender, RoutedEventArgs e)
         {
             ProgressImage1.Visibility = Visibility.Visible;
+            ExportToExcelImage.Visibility = Visibility.Hidden;
             ExportToExcelButton.IsEnabled = false;
             ThreadPool.QueueUserWorkItem(state =>
             {
@@ -241,6 +242,7 @@ namespace BondsMapWPF
                 Dispatcher.Invoke(new System.Action(() =>
                 {
                     ProgressImage1.Visibility = Visibility.Hidden;
+                    ExportToExcelImage.Visibility = Visibility.Visible;
                     ExportToExcelButton.IsEnabled = true;
                 }));
             });

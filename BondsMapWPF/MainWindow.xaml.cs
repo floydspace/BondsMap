@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -337,8 +336,8 @@ namespace BondsMapWPF
         private void GroupsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ((Image) FavoritesButton.Content).Source = !IsInFavorites
-                ? new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute))
-                : new BitmapImage(new Uri(@"pack://application:,,,/Images/favorRemove.jpg", UriKind.RelativeOrAbsolute));
+                ? new BitmapImage(new Uri(@"pack://application:,,,/Images/Pin.png", UriKind.RelativeOrAbsolute))
+                : new BitmapImage(new Uri(@"pack://application:,,,/Images/Unpin.png", UriKind.RelativeOrAbsolute));
         }
 
         private void DeleteGroupButton_Click(object sender, RoutedEventArgs e)
@@ -421,7 +420,7 @@ namespace BondsMapWPF
             {
                 File.Delete(fileName);
                 ((Image) FavoritesButton.Content).Source =
-                    new BitmapImage(new Uri(@"pack://application:,,,/Images/favorAdd.jpg", UriKind.RelativeOrAbsolute));
+                    new BitmapImage(new Uri(@"pack://application:,,,/Images/Pin.png", UriKind.RelativeOrAbsolute));
             }
             else
             {
@@ -431,7 +430,7 @@ namespace BondsMapWPF
                     new XmlSerializer(typeof (BondsGroup)).Serialize(writer, GroupsComboBox.SelectedItem);
 
                 ((Image) FavoritesButton.Content).Source =
-                    new BitmapImage(new Uri(@"pack://application:,,,/Images/favorRemove.jpg", UriKind.RelativeOrAbsolute));
+                    new BitmapImage(new Uri(@"pack://application:,,,/Images/Unpin.png", UriKind.RelativeOrAbsolute));
             }
         }
 
