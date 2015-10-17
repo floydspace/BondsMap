@@ -1,18 +1,17 @@
-﻿using System.Reflection;
-using System.Resources;
-using System.Runtime.CompilerServices;
+﻿using System.Resources;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Windows;
 
 // Управление общими сведениями о сборке осуществляется с помощью 
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
-[assembly: AssemblyTitle("Карта Облигаций v.2.5")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Карта облигаций (v 2.5)")]
+[assembly: AssemblyDescription("Программа предназначена для графического анализа дюраций и доходностей облигаций российских эмитентов котирующихся на Московской Бирже.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("BondsMapWPF")]
-[assembly: AssemblyCopyright("Copyright © VICTOR KORZUNIN 2015")]
+[assembly: AssemblyCompany("Виктор Корзунин")]
+[assembly: AssemblyProduct("BONDS MAP")]
+[assembly: AssemblyCopyright("Copyright © 2015 Victor Korzunin")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -51,5 +50,8 @@ using System.Windows;
 // Можно задать все значения или принять номера сборки и редакции по умолчанию 
 // используя "*", как показано ниже:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.5.0.0")]
-[assembly: AssemblyFileVersion("2.5.0.0")]
+[assembly: AssemblyVersion("2.5.0.4")]
+[assembly: AssemblyFileVersion("2.5.0.4")]
+[assembly: Guid("B7DBFF24-243D-42FA-A4A5-4AEB39ADEE4C")]
+[assembly: NeutralResourcesLanguage("ru-RU")]
+

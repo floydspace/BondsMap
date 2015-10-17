@@ -73,6 +73,12 @@
                         <Image Source="Images/importExcel.png" MaxWidth="16" Stretch="Fill" MaxHeight="16"/>
                     </Button.Content>
                 </Button>
+                <Separator Margin="3"/>
+                <Button Name="AboutButton" ToolTip="О программе" Click="AboutButton_Click">
+                    <Button.Content>
+                        <Image Source="Images/info.png" MaxWidth="16" Stretch="Fill" MaxHeight="16"/>
+                    </Button.Content>
+                </Button>
                 <WrapPanel FlowDirection="RightToLeft">
                     <Button Name="BuildBondsMapButton" Content="Построить" Width="80" Click="BuildBondsMapButton_Click"/>
                 </WrapPanel>
