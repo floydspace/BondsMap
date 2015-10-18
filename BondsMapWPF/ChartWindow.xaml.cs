@@ -6,6 +6,7 @@ using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.Windows.Media.Animation;
 using Microsoft.Office.Interop.Excel;
 using Application = Microsoft.Office.Interop.Excel.Application;
 using Axis = Microsoft.Office.Interop.Excel.Axis;
@@ -139,9 +140,11 @@ namespace BondsMapWPF
 
         private void ExportToExcelButton_Click(object sender, RoutedEventArgs e)
         {
-            ProgressImage1.Visibility = Visibility.Visible;
+            ProgressImage.Visibility = Visibility.Visible;
             ExportToExcelImage.Visibility = Visibility.Hidden;
             ExportToExcelButton.IsEnabled = false;
+            var storyboard = (Storyboard) TryFindResource("ProgressStoryboard");
+            storyboard.Begin();
             ThreadPool.QueueUserWorkItem(state =>
             {
                 var excel = new Application {SheetsInNewWorkbook = 1};
@@ -241,9 +244,10 @@ namespace BondsMapWPF
 
                 Dispatcher.Invoke(new System.Action(() =>
                 {
-                    ProgressImage1.Visibility = Visibility.Hidden;
+                    ProgressImage.Visibility = Visibility.Hidden;
                     ExportToExcelImage.Visibility = Visibility.Visible;
                     ExportToExcelButton.IsEnabled = true;
+                    storyboard.Stop();
                 }));
             });
         }

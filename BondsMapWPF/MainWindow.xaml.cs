@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Xml;
 using System.Runtime.Serialization;
+using System.Windows.Media.Animation;
 using FloydSpace.MICEX.Portable;
 using Microsoft.Win32;
 
@@ -240,6 +241,8 @@ namespace BondsMapWPF
         {
             ProgressImageListBox.Visibility = Visibility.Visible;
             FoundedRecordsListBox.IsEnabled = false;
+            var animation = (Storyboard)TryFindResource("ProgressStoryboardListBox");
+            animation.Begin();
 
             MarketDatas =
                 (await MicexGrabber.GetMarketDataAsync(date, bondsCollectionId, 7, "stock", "bonds")).Where(
@@ -250,6 +253,7 @@ namespace BondsMapWPF
 
             ProgressImageListBox.Visibility = Visibility.Hidden;
             FoundedRecordsListBox.IsEnabled = true;
+            animation.Stop();
         }
 
         private void FilterFoundedBonds(params string[] expressions)
@@ -290,6 +294,8 @@ namespace BondsMapWPF
 
             ProgressImage.Visibility = Visibility.Visible;
             Grid1.IsEnabled = false;
+            var animation = (Storyboard)TryFindResource("ProgressStoryboard");
+            animation.Begin();
             var task = new Task(() =>
             {
                 Parallel.ForEach(secItems, item =>
@@ -326,6 +332,7 @@ namespace BondsMapWPF
             await task;
             ProgressImage.Visibility = Visibility.Hidden;
             Grid1.IsEnabled = true;
+            animation.Stop();
         }
 
         private void AddAll_Click(object sender, RoutedEventArgs e)

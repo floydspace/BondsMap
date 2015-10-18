@@ -3,8 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:charting="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
-        xmlns:gif="http://wpfanimatedgif.codeplex.com"
         Title="Карта облигаций" Height="540" Width="960" Icon="Images/Chart.png" ResizeMode="CanResizeWithGrip">
+    <Window.Resources>
+        <Storyboard x:Key="ProgressStoryboard" RepeatBehavior="Forever">
+            <DoubleAnimation Storyboard.TargetName="ProgressImage" Storyboard.TargetProperty="(Rectangle.RenderTransform).(RotateTransform.Angle)" To="-360" Duration="0:0:1"/>
+        </Storyboard>
+    </Window.Resources>
     <DockPanel Margin="3">
         <WrapPanel DockPanel.Dock="Top">
             <Button ToolTip="Печать..." Click="Button_Click" Background="{x:Null}" BorderBrush="{x:Null}">
@@ -16,7 +20,11 @@
                 <Button.Content>
                     <Grid>
                         <Image Name="ExportToExcelImage" Source="Images/XLS.png" MaxHeight="32" MaxWidth="32" Stretch="Fill"/>
-                        <Image Name="ProgressImage1" Visibility="Hidden" gif:ImageBehavior.AnimatedSource="Images/busy.gif" StretchDirection="DownOnly" />
+                        <Image Name="ProgressImage" Source="Images/Synchronize.png" Visibility="Hidden" MaxHeight="32" MaxWidth="32" StretchDirection="DownOnly" RenderTransformOrigin="0.5,0.5" >
+                            <Image.RenderTransform>
+                                <RotateTransform/>
+                            </Image.RenderTransform>
+                        </Image>
                     </Grid>
                 </Button.Content>
             </Button>
