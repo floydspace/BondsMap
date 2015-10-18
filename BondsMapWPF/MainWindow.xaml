@@ -45,7 +45,7 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <DockPanel Grid.Row="0" Margin="0,3,3,0">
-                <ComboBox Width="200" Height="30" Name="GroupsComboBox" DisplayMemberPath="Name" SelectionChanged="GroupsComboBox_SelectionChanged" VerticalContentAlignment="Center" VerticalAlignment="Center" />
+                <ComboBox Width="200" Height="30" Name="GroupsComboBox" DisplayMemberPath="Name" VerticalContentAlignment="Center" VerticalAlignment="Center" />
                 <Button Name="CreateGroupButton" Click="CreateGroupButton_Click" ToolTip="Создать группу" Background="{x:Null}" BorderBrush="{x:Null}">
                     <Button.Content>
                         <Image Source="Images/add.png" MaxHeight="32" MaxWidth="32" Stretch="Fill"/>
@@ -56,11 +56,16 @@
                         <Image Source="Images/delete.png" Stretch="Fill" MaxHeight="32" MaxWidth="32"/>
                     </Button.Content>
                 </Button>
-                <Button Name="FavoritesButton" ToolTip="Добавить группу в избранное" Click="FavoritesButton_Click" Background="{x:Null}" BorderBrush="{x:Null}">
-                    <Button.Content>
-                        <Image Source="Images/Pin.png" Stretch="Fill" MaxHeight="32" MaxWidth="32"/>
-                    </Button.Content>
-                </Button>
+                <ToggleButton Name="IsFavoriteButton" IsChecked="{Binding SelectedItem.(bondsMapWpf:BondsGroup.IsFavorite), ElementName=GroupsComboBox, Mode=TwoWay}" ToolTip="Добавить группу в избранное?" Background="{x:Null}" BorderBrush="{x:Null}">
+                    <ToggleButton.Content>
+                        <Image Source="Images/Favorite.png" Stretch="Fill" MaxHeight="32" MaxWidth="32"/>
+                    </ToggleButton.Content>
+                </ToggleButton>
+                <ToggleButton Name="ShowOnChartButton" IsChecked="{Binding SelectedItem.(bondsMapWpf:BondsGroup.ShowOnChart), ElementName=GroupsComboBox, Mode=TwoWay}" ToolTip="Отображать группу на графике?" Background="{x:Null}" BorderBrush="{x:Null}">
+                    <ToggleButton.Content>
+                        <Image Source="Images/Visible.png" Stretch="Fill" MaxHeight="32" MaxWidth="32"/>
+                    </ToggleButton.Content>
+                </ToggleButton>
                 <Separator Margin="10"/>
                 <Button Name="AddNewRowButton" ToolTip="Добавить пустую строку" Click="AddNewRowButton_Click" Background="{x:Null}" BorderBrush="{x:Null}">
                     <Button.Content>

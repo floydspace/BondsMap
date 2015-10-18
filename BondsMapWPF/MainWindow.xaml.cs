@@ -8,17 +8,47 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
 using System.Xml;
-using System.Xml.Serialization;
+using System.Runtime.Serialization;
 using FloydSpace.MICEX.Portable;
 using Microsoft.Win32;
 
 namespace BondsMapWPF
 {
+    [DataContract]
     public class BondsGroup
     {
+        [DataMember]
         public string Name { get; set; }
+
+        [DataMember]
+        public bool ShowOnChart { get; set; }
+
+        [DataMember(Name = "IsFavorite")] private bool _isFavorite;
+
+        public bool IsFavorite
+        {
+            get { return _isFavorite; }
+            set
+            {
+                _isFavorite = value;
+
+                var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
+                var fileName = Path.Combine(favoritesDirectory, Name + ".xml");
+                if (_isFavorite)
+                {
+                    Directory.CreateDirectory(favoritesDirectory);
+                    using (var writer = XmlWriter.Create(fileName))
+                        new DataContractSerializer(typeof (BondsGroup)).WriteObject(writer, this);
+                }
+                else
+                {
+                    File.Delete(fileName);
+                }
+            }
+        }
+
+        [DataMember]
         public ObservableCollection<Bond> BondItems { get; set; }
     }
 
@@ -149,7 +179,8 @@ namespace BondsMapWPF
 
         public string BoardId { get; set; }
 
-        public string ChartTip {
+        public string ChartTip
+        {
             get
             {
                 return string.Format("Доходность: {0:N2} | Дюрация: {1:N0}", YieldClose.GetValueOrDefault(),
@@ -167,9 +198,6 @@ namespace BondsMapWPF
         }
     }
 
-    /// <summary>
-    /// Логика взаимодействия для MainWindow.xaml
-    /// </summary>
     public partial class MainWindow
     {
         private int _i;
@@ -180,11 +208,12 @@ namespace BondsMapWPF
             InitializeComponent();
 
             CalendarReports.SelectedDate = DateTime.Today;
+
             var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
             if (!Directory.Exists(favoritesDirectory)) return;
             foreach (var favoritesFile in Directory.GetFiles(favoritesDirectory))
                 using (var reader = XmlReader.Create(favoritesFile))
-                    GroupsComboBox.Items.Add(new XmlSerializer(typeof (BondsGroup)).Deserialize(reader));
+                    GroupsComboBox.Items.Add(new DataContractSerializer(typeof (BondsGroup)).ReadObject(reader));
 
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
@@ -232,7 +261,13 @@ namespace BondsMapWPF
 
         private void CreateGroup(string s)
         {
-            var bondsGroup = new BondsGroup {Name = s, BondItems = new ObservableCollection<Bond>()};
+            var bondsGroup = new BondsGroup
+            {
+                Name = s,
+                BondItems = new ObservableCollection<Bond>(),
+                IsFavorite = false,
+                ShowOnChart = true
+            };
             GroupsComboBox.Items.Add(bondsGroup);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
@@ -273,7 +308,10 @@ namespace BondsMapWPF
                         RegNumber = marketData.RegNumber,
                         BoardName = marketData.BoardName,
                         BoardId = marketData.BoardId,
-                        YieldClose = marketData.YieldClose ?? (marketData.Yield != new int() ? marketData.Yield : new int?()) ?? (marketData.CloseYield != new int() ? marketData.CloseYield : new int?()),
+                        YieldClose =
+                            marketData.YieldClose ??
+                            (marketData.Yield != new int() ? marketData.Yield : new int?()) ??
+                            (marketData.CloseYield != new int() ? marketData.CloseYield : new int?()),
                         Duration = marketData.Duration != new int() ? marketData.Duration : new int?(),
                         CurrencyId = marketData.CurrencyId,
                         BuyBackDate = marketData.BuyBackDate,
@@ -317,13 +355,6 @@ namespace BondsMapWPF
             Remove_Click(null, null);
         }
 
-        private void BuildBondsMapButton_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedRecordsTables = GroupsComboBox.Items.Cast<BondsGroup>().ToArray();
-            if (selectedRecordsTables.SelectMany(s => s.BondItems)
-                .All(w => !w.Duration.HasValue || !w.YieldClose.HasValue)) return;
-            new ChartWindow(selectedRecordsTables).Show();
-        }
 
         private void CreateGroupButton_Click(object sender, RoutedEventArgs e)
         {
@@ -333,21 +364,12 @@ namespace BondsMapWPF
                     " - ", CalendarReports.SelectedDate.GetValueOrDefault().ToString("d")), CreateGroup).ShowDialog(this);
         }
 
-        private void GroupsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            ((Image) FavoritesButton.Content).Source = !IsInFavorites
-                ? new BitmapImage(new Uri(@"pack://application:,,,/Images/Pin.png", UriKind.RelativeOrAbsolute))
-                : new BitmapImage(new Uri(@"pack://application:,,,/Images/Unpin.png", UriKind.RelativeOrAbsolute));
-        }
-
         private void DeleteGroupButton_Click(object sender, RoutedEventArgs e)
         {
             var selectedTable = GroupsComboBox.SelectedItem as BondsGroup;
             if (selectedTable == null) return;
-            var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
-            var fileName = Path.Combine(favoritesDirectory, selectedTable.Name + ".xml");
-            if (File.Exists(fileName)) File.Delete(fileName);
 
+            selectedTable.IsFavorite = false;
             GroupsComboBox.Items.Remove(GroupsComboBox.SelectedItem);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
         }
@@ -391,52 +413,21 @@ namespace BondsMapWPF
 
             FillDataGrid(
                 MarketDatas.Where(w => isins.Contains(w.SecId) || isins.Contains(w.RegNumber) || isins.Contains(w.Isin))
-                    .Where(
-                        w =>
-                            !((BondsGroup) GroupsComboBox.SelectedItem).BondItems.Any(
-                                row => row.BoardId == w.BoardId && row.SecurityId == w.SecId)).ToList());
-        }
-
-        public bool IsInFavorites
-        {
-            get
-            {
-                var selectedTable = GroupsComboBox.SelectedItem as BondsGroup;
-                if (selectedTable == null) return false;
-
-                var fileName = Path.Combine(Environment.CurrentDirectory, "Favorites", selectedTable.Name + ".xml");
-                return File.Exists(fileName);
-            }
-        }
-
-        private void FavoritesButton_Click(object sender, RoutedEventArgs e)
-        {
-            var selectedTable = GroupsComboBox.SelectedItem as BondsGroup;
-            if (selectedTable == null) return;
-
-            var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
-            var fileName = Path.Combine(favoritesDirectory, selectedTable.Name + ".xml");
-            if (File.Exists(fileName))
-            {
-                File.Delete(fileName);
-                ((Image) FavoritesButton.Content).Source =
-                    new BitmapImage(new Uri(@"pack://application:,,,/Images/Pin.png", UriKind.RelativeOrAbsolute));
-            }
-            else
-            {
-                Directory.CreateDirectory(favoritesDirectory);
-
-                using (XmlWriter writer = XmlWriter.Create(fileName))
-                    new XmlSerializer(typeof (BondsGroup)).Serialize(writer, GroupsComboBox.SelectedItem);
-
-                ((Image) FavoritesButton.Content).Source =
-                    new BitmapImage(new Uri(@"pack://application:,,,/Images/Unpin.png", UriKind.RelativeOrAbsolute));
-            }
+                    .Where(w => !((BondsGroup) GroupsComboBox.SelectedItem).BondItems.Any(
+                        row => row.BoardId == w.BoardId && row.SecurityId == w.SecId)).ToList());
         }
 
         private void AboutButton_Click(object sender, RoutedEventArgs e)
         {
             new AboutWindow {Owner = this}.ShowDialog();
+        }
+
+        private void BuildBondsMapButton_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedRecordsTables = GroupsComboBox.Items.Cast<BondsGroup>().Where(w => w.ShowOnChart).ToArray();
+            if (selectedRecordsTables.SelectMany(s => s.BondItems)
+                .All(w => !w.Duration.HasValue || !w.YieldClose.HasValue)) return;
+            new ChartWindow(selectedRecordsTables).Show();
         }
     }
 }
