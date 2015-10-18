@@ -56,7 +56,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>Chart.ico</ApplicationIcon>
+    <ApplicationIcon>Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>54313E1349D5A18A218A09B7A88528C2FCA7645E</ManifestCertificateThumbprint>
@@ -202,9 +202,6 @@
     <Resource Include="Images\busy.gif" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\Chart.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <SplashScreen Include="Images\ej8whtnurbgwnwy.png" />
   </ItemGroup>
   <ItemGroup>
@@ -279,13 +276,13 @@
     <Resource Include="Images\XLS.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Chart.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\Visible.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Favorite.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Icon.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets" Condition="Exists('..\packages\Microsoft.Bcl.Build.1.0.21\build\Microsoft.Bcl.Build.targets')" />
