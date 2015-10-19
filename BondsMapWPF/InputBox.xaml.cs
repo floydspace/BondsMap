@@ -1,5 +1,9 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Media;
+using MessageBox = System.Windows.Forms.MessageBox;
 
 namespace BondsMapWPF
 {
@@ -8,8 +12,8 @@ namespace BondsMapWPF
     /// </summary>
     public partial class InputBox
     {
-        private readonly Action<string> _action;
-        public InputBox(string defaultName, Action<string> action)
+        private readonly Func<string, bool> _action;
+        public InputBox(string defaultName, Func<string, bool> action)
         {
             _action = action;
             
@@ -27,8 +31,15 @@ namespace BondsMapWPF
 
         private void OkButton_Click(object sender, RoutedEventArgs e)
         {
-            _action(NameTextBox.Text);
-            Close();
+            if (_action(NameTextBox.Text))
+                Close();
+            else
+            {
+                MessageBox.Show(@"Группа с таким именем уже существует!", @"Ошибка валидации",
+                    System.Windows.Forms.MessageBoxButtons.OK, System.Windows.Forms.MessageBoxIcon.Exclamation);
+                NameTextBox.SelectAll();
+                NameTextBox.Focus();
+            }
         }
 
         public void ShowDialog(Window owner)

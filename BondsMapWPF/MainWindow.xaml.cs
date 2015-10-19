@@ -20,6 +20,12 @@ namespace BondsMapWPF
     public class BondsGroup
     {
         [DataMember]
+        public int Id
+        {
+            get { return Name.GetHashCode(); }
+        }
+
+        [DataMember]
         public string Name { get; set; }
 
         [DataMember]
@@ -264,7 +270,7 @@ namespace BondsMapWPF
                     tm => tm.ToLowerInvariant().Contains(expression.ToLowerInvariant())))).OrderBy(o => o.ShortName);
         }
 
-        private void CreateGroup(string s)
+        private bool CreateGroup(string s)
         {
             var bondsGroup = new BondsGroup
             {
@@ -273,8 +279,11 @@ namespace BondsMapWPF
                 IsFavorite = false,
                 ShowOnChart = true
             };
+            if ((GroupsComboBox.Items.Cast<BondsGroup>()).Select(item => item.Id).Contains(bondsGroup.Id))
+                return false;
             GroupsComboBox.Items.Add(bondsGroup);
             GroupsComboBox.SelectedIndex = GroupsComboBox.Items.Count - 1;
+            return true;
         }
 
         private void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
