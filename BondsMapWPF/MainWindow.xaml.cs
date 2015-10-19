@@ -44,7 +44,8 @@ namespace BondsMapWPF
                 }
                 else
                 {
-                    File.Delete(fileName);
+                    if (File.Exists(fileName))
+                        File.Delete(fileName);
                 }
             }
         }
@@ -212,7 +213,7 @@ namespace BondsMapWPF
 
             var favoritesDirectory = Path.Combine(Environment.CurrentDirectory, "Favorites");
             if (!Directory.Exists(favoritesDirectory)) return;
-            foreach (var favoritesFile in Directory.GetFiles(favoritesDirectory))
+            foreach (var favoritesFile in Directory.GetFiles(favoritesDirectory, "*.xml"))
                 using (var reader = XmlReader.Create(favoritesFile))
                     GroupsComboBox.Items.Add(new DataContractSerializer(typeof (BondsGroup)).ReadObject(reader));
 

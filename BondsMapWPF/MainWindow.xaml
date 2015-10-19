@@ -26,8 +26,8 @@
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-            <DatePicker Grid.Row="0" Name="CalendarReports" SelectedDateChanged="CalendarReports_SelectedDatesChanged" Margin="0,3,0,0" VerticalContentAlignment="Center"/>
-            <ComboBox Grid.Row="1" Name="SecGroupsComboBox" DisplayMemberPath="Title" Margin="0,6,0,0" SelectionChanged="SecGroupsComboBox_SelectionChanged"/>
+            <DatePicker Grid.Row="0" Name="CalendarReports" SelectedDateChanged="CalendarReports_SelectedDatesChanged" Margin="0,4,0,4" VerticalContentAlignment="Center"/>
+            <ComboBox Grid.Row="1" Name="SecGroupsComboBox" DisplayMemberPath="Title" Margin="0,3,0,0" SelectionChanged="SecGroupsComboBox_SelectionChanged"/>
             <TextBox Grid.Row="2" Name="SearchTextBox" Margin="0,3,0,0" TextChanged="SearchTextBox_TextChanged"/>
             <ListBox Grid.Row="3" Name="FoundedRecordsListBox" DisplayMemberPath="ShortName" Margin="0,3,0,0" SelectionMode="Extended"/>
             <Image Grid.Row="3" Name="ProgressImageListBox" Source="Images/Synchronize.png" Visibility="Hidden" StretchDirection="DownOnly" RenderTransformOrigin="0.5,0.5" MaxHeight="30" MaxWidth="30" >
