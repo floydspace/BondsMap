@@ -10,6 +10,7 @@ using System.Xml;
 using System.Runtime.Serialization;
 using System.Windows.Media.Animation;
 using FloydSpace.MICEX.Portable;
+using FloydSpace.MICEX.Portable.Maps;
 using Microsoft.Win32;
 
 namespace BondsMapWPF
