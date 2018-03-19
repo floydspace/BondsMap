@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2005
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BondsMapWPF", "BondsMapWPF\BondsMapWPF.csproj", "{B7DBFF24-243D-42FA-A4A5-4AEB39ADEE4C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BondsMap.WPF", "BondsMap.WPF\BondsMap.WPF.csproj", "{B7DBFF24-243D-42FA-A4A5-4AEB39ADEE4C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MICEX.Portable", "..\FloydSpace\MICEX.Portable\MICEX.Portable.csproj", "{CA3D0040-05EE-4D37-8727-8BF45CA09328}"
 EndProject
@@ -30,5 +30,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AE95A1D1-8DD1-4485-9D88-E54FD3D09F75}
 	EndGlobalSection
 EndGlobal
